@@ -51,4 +51,4 @@ VOLUME /hipims/Outputs
 
 # Entrypoint, comment out either one of the CMD instructions
 WORKDIR /hipims/Newcastle
-CMD python3 run_script.py
+CMD python3 singleGPU_example.py
