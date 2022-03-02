@@ -1,0 +1,5 @@
+name: hipims
+channels:
+  - conda
+dependencies:
+  - python=3.7
