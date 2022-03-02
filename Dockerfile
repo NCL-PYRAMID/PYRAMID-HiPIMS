@@ -17,13 +17,12 @@ RUN echo "conda activate objdet" >> ~/.bashrc
 
 # Use python 3.6 due to syntax incompatibility with python 3.7+
 RUN conda create -n hipims python=3.7 -y
-RUN conda init bash
+RUN conda activate hipims
 
-RUN conda install pytorch torchvision cudatoolkit -c pytorch
-RUN conda config --add channels conda-forge 
+RUN conda install pytorch torchvision cudatoolkit
 RUN conda install numpy matplotlib pyqt seaborn tqdm kiwisolver
 RUN conda install rasterio pysal pyproj rasterstats geopy cartopy contextily earthpy folium geojson mapboxgl hydrofunctions 
-RUN conda geocoder tweepy
+RUN conda install geocoder tweepy
 
 # Set CUDA
 ENV CUDA_ROOT /usr/local/cuda/bin
