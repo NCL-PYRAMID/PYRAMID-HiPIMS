@@ -21,8 +21,8 @@ RUN conda activate hipims
 
 RUN conda install pytorch torchvision cudatoolkit
 RUN conda install numpy matplotlib pyqt seaborn tqdm kiwisolver
-RUN conda install rasterio pysal pyproj rasterstats geopy cartopy contextily earthpy folium geojson mapboxgl hydrofunctions 
-RUN conda install geocoder tweepy
+RUN conda install rasterio pysal pyproj rasterstats geopy cartopy contextily earthpy folium
+RUN conda install geojson mapboxgl geocoder tweepy
 
 # Set CUDA
 ENV CUDA_ROOT /usr/local/cuda/bin
