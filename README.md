@@ -28,7 +28,7 @@ CUDA 10.0
 GCC 4.9+
 
 ### Installation
-a.Creat and activate an anaconda virtual environment 
+a. Creat and activate an anaconda virtual environment 
 
 conda create --name hipims python=3.7
 conda activate hipims
