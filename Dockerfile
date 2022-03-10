@@ -28,6 +28,8 @@ RUN conda update -n base -c defaults conda
 # Does NOT work with Python 3.8+, specifically with rasterio module
 COPY environment.yml .
 RUN conda env create -f environment.yml
+
+# Need this if we want to use RUN commands in the proper environment
 #SHELL ["conda", "run", "-n", "hipims", "/bin/bash", "-c"]
 
 # Unused packages and channels, for reference
@@ -37,31 +39,31 @@ RUN conda env create -f environment.yml
 
 # Packages in the Python source
 # Using the conda channel as default except where noted
-RUN conda install pytorch -n hipims -y
-RUN conda install numpy -n hipims -y
-RUN conda install matplotlib -n hipims -y
-RUN conda install seaborn -n hipims -y
-RUN conda install shapely -n hipims -y
-RUN conda install rasterio -n hipims -y
-RUN conda install geopandas -n hipims -y
-RUN conda install earthpy -n hipims -y --channel conda-forge
+RUN conda install pytorch=1.8.1 -n hipims -y
+RUN conda install numpy=1.19.2 -n hipims -y
+RUN conda install matplotlib=3.5.1 -n hipims -y
+RUN conda install seaborn=0.11.2 -n hipims -y
+RUN conda install shapely=1.7.1 -n hipims -y
+RUN conda install rasterio=1.1.0 -n hipims -y
+RUN conda install geopandas=0.9.0 -n hipims -y
+RUN conda install earthpy=0.9.4 -n hipims -y --channel conda-forge
 
 # Additional packages needed
-RUN conda install pyqt -n hipims -y
-RUN conda install tqdm -n hipims -y
-RUN conda install kiwisolver -n hipims -y
-RUN conda install pysal -n hipims -y
-RUN conda install pyproj -n hipims -y
-RUN conda install rasterstats -n hipims -y
-RUN conda install geopy -n hipims -y --channel conda-forge
-RUN conda install cartopy -n hipims -y
-RUN conda install contextily -n hipims -y --channel conda-forge
-RUN conda install folium -n hipims -y --channel conda-forge
-RUN conda install geojson -n hipims -y --channel conda-forge
-RUN conda install mapboxgl -n hipims -y --channel conda-forge
-RUN conda install hydrofunctions -n hipims -y --channel conda-forge
-RUN conda install geocoder -n hipims -y --channel conda-forge
-RUN conda install tweepy -n hipims -y --channel conda-forge
+RUN conda install pyqt=5.9.2 -n hipims -y
+RUN conda install tqdm=4.62.3 -n hipims -y
+RUN conda install kiwisolver=1.3.2 -n hipims -y
+RUN conda install pysal=1.14.4.post1 -n hipims -y
+RUN conda install pyproj=2.6.1.post1 -n hipims -y
+RUN conda install rasterstats=0.14.0 -n hipims -y
+RUN conda install geopy=2.2.0 -n hipims -y --channel conda-forge
+RUN conda install cartopy=0.18.0 -n hipims -y
+RUN conda install contextily=1.2.0 -n hipims -y --channel conda-forge
+RUN conda install folium=0.12.1.post1 -n hipims -y --channel conda-forge
+RUN conda install geojson=2.5.0 -n hipims -y --channel conda-forge
+RUN conda install mapboxgl=0.10.2 -n hipims -y --channel conda-forge
+RUN conda install hydrofunctions=0.2.1 -n hipims -y --channel conda-forge
+RUN conda install geocoder=1.38.1 -n hipims -y --channel conda-forge
+RUN conda install tweepy=4.6.0 -n hipims -y --channel conda-forge
 
 # Set CUDA environment
 ENV CUDA_ROOT /usr/local/cuda/bin
