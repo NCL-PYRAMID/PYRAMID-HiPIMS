@@ -21,6 +21,8 @@ RUN apt upgrade -y
 RUN wget https://repo.anaconda.com/archive/Anaconda3-2020.11-Linux-x86_64.sh -O ~/anaconda.sh
 RUN /bin/bash ~/anaconda.sh -b -p /opt/conda
 RUN ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
+RUN conda update -n base -c defaults conda
+
 
 # Requires Python 3.7
 # Does NOT work with Python 3.8+, specifically with rasterio module
@@ -28,16 +30,13 @@ COPY environment.yml .
 RUN conda env create -f environment.yml
 #SHELL ["conda", "run", "-n", "hipims", "/bin/bash", "-c"]
 
-# 1. Do we need conda-forge?
-#RUN conda config --add channels conda-forge 
-# 2. Do we need to use the "pytorch" channel?
-#RUN conda install pytorch -c pytorch
-#RUN conda install torchvision -c pytorch
-#RUN conda install cudatoolkit -c pytorch
+# Unused packages and channels, for reference
+#RUN conda config --add channels conda-forge pytorch
 #RUN conda install torchvision
 #RUN conda install cudatoolkit
 
-# 3. Definitely in the Python source
+# Packages in the Python source
+# Using the conda channel as default except where noted
 RUN conda install pytorch -n hipims -y
 RUN conda install numpy -n hipims -y
 RUN conda install matplotlib -n hipims -y
@@ -45,41 +44,37 @@ RUN conda install seaborn -n hipims -y
 RUN conda install shapely -n hipims -y
 RUN conda install rasterio -n hipims -y
 RUN conda install geopandas -n hipims -y
-# earthpy is only available from conda-forge
-RUN conda install earthpy -n hipims -y -c conda-forge
+RUN conda install earthpy -n hipims -y --channel conda-forge
 
-# 4. What are all of these?
-#RUN conda install pyqt
-#RUN conda install tqdm
-#RUN conda install kiwisolver
-#RUN conda install pysal
-#RUN conda install pyproj
-#RUN conda install rasterstats
-#RUN conda install geopy
-#RUN conda install cartopy
-#RUN conda install contextily
-#RUN conda install folium
-#RUN conda install geojson
-#RUN conda install mapboxgl
-#RUN conda install hydrofunctions 
+# Additional packages needed
+RUN conda install pyqt -n hipims -y
+RUN conda install tqdm -n hipims -y
+RUN conda install kiwisolver -n hipims -y
+RUN conda install pysal -n hipims -y
+RUN conda install pyproj -n hipims -y
+RUN conda install rasterstats -n hipims -y
+RUN conda install geopy -n hipims -y --channel conda-forge
+RUN conda install cartopy -n hipims -y
+RUN conda install contextily -n hipims -y --channel conda-forge
+RUN conda install folium -n hipims -y --channel conda-forge
+RUN conda install geojson -n hipims -y --channel conda-forge
+RUN conda install mapboxgl -n hipims -y --channel conda-forge
+RUN conda install hydrofunctions -n hipims -y --channel conda-forge
+RUN conda install geocoder -n hipims -y --channel conda-forge
+RUN conda install tweepy -n hipims -y --channel conda-forge
 
-# 5. What are these?
-#RUN conda install geocoder tweepy
-
-
-# Set CUDA
+# Set CUDA environment
 ENV CUDA_ROOT /usr/local/cuda/bin
 
-#RUN pwd
-# compile hipims model
+# Compile hipims model
 WORKDIR /cuda
-RUN python setup.py install
+#RUN python setup.py install
 
 # you should get back to the directory of 'singleGPU_example.py' at first 
 # sorry I don't know the command
-RUN python singleGPU_example.py
+#RUN python singleGPU_example.py
 
 # Entrypoint, comment out either one of the CMD instructions
 WORKDIR /hipims/Newcastle
-CMD ["python", "singleGPU_example.py"]
-#CMD ["conda", "run", "--no-capture-output", "-n", "hipims", "/bin/bash"]
+#CMD ["python", "singleGPU_example.py"]
+CMD ["conda", "run", "--no-capture-output", "-n", "hipims", "/bin/bash"]
