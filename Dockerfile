@@ -21,7 +21,6 @@ RUN apt upgrade -y
 RUN wget https://repo.anaconda.com/archive/Anaconda3-2020.11-Linux-x86_64.sh -O ~/anaconda.sh
 RUN /bin/bash ~/anaconda.sh -b -p /opt/conda
 RUN ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
-RUN conda update -n base -c defaults conda
 
 # Requires Python 3.7
 # Does NOT work with Python 3.8+, specifically with rasterio module
@@ -71,26 +70,14 @@ RUN conda install earthpy -n hipims -y -c conda-forge
 # Set CUDA
 ENV CUDA_ROOT /usr/local/cuda/bin
 
-# get hipims code, input data, and python script to setup and run hipims model
-RUN mkdir -p /hipims
-WORKDIR /hipims
-
-# create a data dir (this is where DAFNI will check for the data)
-RUN mkdir /data
-RUN mkdir /data/outputs
-
-# copy files over
-COPY cuda /hipims/cuda 
-COPY pythonHipims /hipims/pythonHipims
-#COPY Newcastle /hipims/Newcastle 
-
 #RUN pwd
 # compile hipims model
-WORKDIR /hipims/hipims_apps/cuda
-#RUN python setup.py install
+WORKDIR /cuda
+RUN python setup.py install
 
-#Mount output directories. Must be container directory
-VOLUME /hipims/Outputs
+# you should get back to the directory of 'singleGPU_example.py' at first 
+# sorry I don't know the command
+RUN python singleGPU_example.py
 
 # Entrypoint, comment out either one of the CMD instructions
 WORKDIR /hipims/Newcastle
