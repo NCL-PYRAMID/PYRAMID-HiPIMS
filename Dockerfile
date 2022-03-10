@@ -5,6 +5,7 @@ FROM nvidia/cuda:10.1-devel-ubuntu18.04
 
 ###############################################################################
 # Anaconda setup
+# See: https://pythonspeed.com/articles/activate-conda-dockerfile/
 ###############################################################################
 
 # Relevant environment variables
@@ -22,11 +23,11 @@ RUN /bin/bash ~/anaconda.sh -b -p /opt/conda
 RUN ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
 RUN conda update -n base -c defaults conda
 
-# Use python 3.6 due to syntax incompatibility with python 3.7+
-# But this uses Python 3.7?
-RUN conda create -n hipims python=3.7 -y
-RUN conda init bash
-RUN echo "conda activate hipims" >> ~/.bashrc
+# Requires Python 3.7
+# Does NOT work with Python 3.8+, specifically with rasterio module
+COPY environment.yml .
+RUN conda env create -f environment.yml
+#SHELL ["conda", "run", "-n", "hipims", "/bin/bash", "-c"]
 
 # 1. Do we need conda-forge?
 #RUN conda config --add channels conda-forge 
@@ -38,14 +39,15 @@ RUN echo "conda activate hipims" >> ~/.bashrc
 #RUN conda install cudatoolkit
 
 # 3. Definitely in the Python source
-##RUN conda install pytorch
-#RUN conda install numpy
-#RUN conda install matplotlib
-#RUN conda install seaborn
-##RUN conda install shapely
-RUN bash -c 'conda install rasterio'
-##RUN conda install geopandas
-##RUN conda install earthpy
+RUN conda install pytorch -n hipims -y
+RUN conda install numpy -n hipims -y
+RUN conda install matplotlib -n hipims -y
+RUN conda install seaborn -n hipims -y
+RUN conda install shapely -n hipims -y
+RUN conda install rasterio -n hipims -y
+RUN conda install geopandas -n hipims -y
+# earthpy is only available from conda-forge
+RUN conda install earthpy -n hipims -y -c conda-forge
 
 # 4. What are all of these?
 #RUN conda install pyqt
@@ -92,5 +94,5 @@ VOLUME /hipims/Outputs
 
 # Entrypoint, comment out either one of the CMD instructions
 WORKDIR /hipims/Newcastle
-#CMD python3 singleGPU_example.py
-CMD bash
+CMD ["python", "singleGPU_example.py"]
+#CMD ["conda", "run", "--no-capture-output", "-n", "hipims", "/bin/bash"]
