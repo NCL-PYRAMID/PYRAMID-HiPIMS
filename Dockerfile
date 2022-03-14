@@ -1,7 +1,7 @@
 ###############################################################################
 # Base image - CUDA on Ubuntu
 ###############################################################################
-FROM nvidia/cuda:10.1-devel-ubuntu18.04
+FROM nvidia/cuda:10.2-devel-ubuntu18.04
 
 ###############################################################################
 # Anaconda setup
@@ -17,17 +17,22 @@ RUN apt update --fix-missing
 RUN apt install -y wget
 RUN apt upgrade -y
 
-# Get and install Anaconda, add conda environment setup to end of ./bashrc
+# Get and install Anaconda
 RUN wget https://repo.anaconda.com/archive/Anaconda3-2020.11-Linux-x86_64.sh -O ~/anaconda.sh
 RUN /bin/bash ~/anaconda.sh -b -p /opt/conda
 RUN ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
 RUN conda update -n base -c defaults conda
+# Use conda-forge and strict channel priority (setup .condarc for this)
+RUN echo -e \
+"channel_priority: strict\n\
+channels:\n\
+  - conda-forge\n\
+  - defaults" > ~/.condarc
 
-
-# Requires Python 3.7
+# Requires Python 3.7 - all requirements are in hipims-environment.yml
 # Does NOT work with Python 3.8+, specifically with rasterio module
-COPY environment.yml .
-RUN conda env create -f environment.yml
+COPY hipims-environment.yml .
+RUN conda env create -f hipims-environment.yml --debug
 
 # Need this if we want to use RUN commands in the proper environment
 #SHELL ["conda", "run", "-n", "hipims", "/bin/bash", "-c"]
@@ -39,31 +44,40 @@ RUN conda env create -f environment.yml
 
 # Packages in the Python source
 # Using the conda channel as default except where noted
-RUN conda install pytorch=1.8.1 -n hipims -y
-RUN conda install numpy=1.19.2 -n hipims -y
-RUN conda install matplotlib=3.5.1 -n hipims -y
-RUN conda install seaborn=0.11.2 -n hipims -y
-RUN conda install shapely=1.7.1 -n hipims -y
-RUN conda install rasterio=1.1.0 -n hipims -y
-RUN conda install geopandas=0.9.0 -n hipims -y
-RUN conda install earthpy=0.9.4 -n hipims -y --channel conda-forge
+#RUN CONDA_CUDA_OVERRIDE="10.2" conda install "pytorch==1.10.2=cuda102*" -n hipims --channel conda-forge -y
+#UN conda install numpy=1.21.5
+#UN conda install matplotlib=3.5.1 -n hipims -y
+#UN conda install seaborn=0.11.2 -n hipims -y
+#UN conda install shapely=1.8.0 -n hipims -y
+#UN conda install rasterio=1.2.10 -n hipims -y
+#UN conda install geopandas=0.10.2 -n hipims -y
+#RUN conda install earthpy=0.9.4 -n hipims -y --channel conda-forge
+#UN conda install earthpy=0.9.4 -n hipims -y
 
 # Additional packages needed
-RUN conda install pyqt=5.9.2 -n hipims -y
-RUN conda install tqdm=4.62.3 -n hipims -y
-RUN conda install kiwisolver=1.3.2 -n hipims -y
-RUN conda install pysal=1.14.4.post1 -n hipims -y
-RUN conda install pyproj=2.6.1.post1 -n hipims -y
-RUN conda install rasterstats=0.14.0 -n hipims -y
-RUN conda install geopy=2.2.0 -n hipims -y --channel conda-forge
-RUN conda install cartopy=0.18.0 -n hipims -y
-RUN conda install contextily=1.2.0 -n hipims -y --channel conda-forge
-RUN conda install folium=0.12.1.post1 -n hipims -y --channel conda-forge
-RUN conda install geojson=2.5.0 -n hipims -y --channel conda-forge
-RUN conda install mapboxgl=0.10.2 -n hipims -y --channel conda-forge
-RUN conda install hydrofunctions=0.2.1 -n hipims -y --channel conda-forge
-RUN conda install geocoder=1.38.1 -n hipims -y --channel conda-forge
-RUN conda install tweepy=4.6.0 -n hipims -y --channel conda-forge
+#UN conda install pyqt=5.12.3 -n hipims -y
+#UN conda install tqdm=4.62.3 -n hipims -y
+#UN conda install kiwisolver=1.3.2 -n hipims -y
+#UN conda install pysal=2.6.0 -n hipims -y
+#UN conda install pyproj=3.2.1 -n hipims -y
+#UN conda install rasterstats=0.16.0 -n hipims -y
+#RUN conda install geopy=2.2.0 -n hipims -y --channel conda-forge
+#UN conda install geopy=2.2.0 -n hipims -y
+#UN conda install cartopy=0.20.2 -n hipims -y
+#RUN conda install contextily=1.2.0 -n hipims -y --channel conda-forge
+#UN conda install contextily=1.2.0 -n hipims -y
+#RUN conda install folium=0.12.1.post1 -n hipims -y --channel conda-forge
+#UN conda install folium=0.12.1.post1 -n hipims -y
+#RUN conda install geojson=2.5.0 -n hipims -y --channel conda-forge
+#UN conda install geojson=2.5.0 -n hipims -y
+#RUN conda install mapboxgl=0.10.2 -n hipims -y --channel conda-forge
+#UN conda install mapboxgl=0.10.2 -n hipims -y
+#RUN conda install hydrofunctions=0.2.1 -n hipims -y --channel conda-forge
+#UN conda install hydrofunctions=0.2.1 -n hipims -y
+#RUN conda install geocoder=1.38.1 -n hipims -y --channel conda-forge
+#UN conda install geocoder=1.38.1 -n hipims -y
+#RUN conda install tweepy=4.6.0 -n hipims -y --channel conda-forge
+#UN conda install tweepy=4.6.0 -n hipims -y
 
 # Set CUDA environment
 ENV CUDA_ROOT /usr/local/cuda/bin
