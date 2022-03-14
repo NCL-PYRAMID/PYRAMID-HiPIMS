@@ -1,9 +1,17 @@
-import os
+###############################################################################
+# HiPIMS application
+# Xue Tong, Robin Wardle, February 2022
+###############################################################################
+import os, sys
 import torch
 import numpy as np
-from hipims.pythonHipims import CatchFlood_main as catchFlood
+from pythonHipims import CatchFlood_main as catchFlood
 
-if __name__ == "__main__":
+# Add to module path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+# Main function
+def main():
     CASE_PATH = os.path.join(os.environ['HOME'], 'Luan_Data_90m')
     RASTER_PATH = os.path.join(CASE_PATH, 'input')
     OUTPUT_PATH = os.path.join(CASE_PATH, 'output')
@@ -43,3 +51,6 @@ if __name__ == "__main__":
     }
 
     catchFlood.run(paraDict)
+
+if __name__ == "__main__":
+    main()
