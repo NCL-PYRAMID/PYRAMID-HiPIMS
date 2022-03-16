@@ -44,15 +44,21 @@ ENV CUDA_ROOT /usr/local/cuda/bin
 #RUN conda install torchvision
 #RUN conda install cudatoolkit
 
+WORKDIR /hipims
+COPY ./ .
+RUN cd cuda
+RUN python setup.py install
+
 # Compile hipims model
-WORKDIR /cuda
+#WORKDIR /cuda
 #RUN python setup.py install
 
 # you should get back to the directory of 'singleGPU_example.py' at first 
 # sorry I don't know the command
-#RUN python singleGPU_example.py
+WORKDIR /hipims
+CMD python singleGPU_example.py
 
 # Entrypoint, comment out either one of the CMD instructions
-WORKDIR /hipims/Newcastle
+#WORKDIR /hipims/Newcastle
 #CMD ["python", "singleGPU_example.py"]
-CMD ["conda", "run", "--no-capture-output", "-n", "hipims", "/bin/bash"]
+#CMD ["conda", "run", "--no-capture-output", "-n", "hipims", "/bin/bash"]
