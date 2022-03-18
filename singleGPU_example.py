@@ -12,11 +12,11 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 # Main function
 def main():
-    CASE_PATH = os.path.join(os.environ['HOME'], 'Luan_Data_90m')
+    CASE_PATH = os.path.join(os.environ['HOME'], 'NewcastleCivilCentre')
     RASTER_PATH = os.path.join(CASE_PATH, 'input')
     OUTPUT_PATH = os.path.join(CASE_PATH, 'output')
-    Rainfall_data_Path = os.path.join(CASE_PATH, 'input/rainSource.txt')
-    Manning = np.array([0.035, 0.1, 0.035, 0.04, 0.15, 0.03])
+    Rainfall_data_Path = os.path.join(CASE_PATH, 'input/rain_source_2523.txt')
+    Manning = np.array([0.02,0.03,0.03,0.03,0.02,0.03,0.03,0.03,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.03])
     Degree = False
     gauges_position = np.array([])
     boundBox = np.array([])
@@ -29,8 +29,8 @@ def main():
     landLevel = 0
 
     paraDict = {
-        'deviceID': 0,
-        'dx': 90.,
+       'deviceID': 0,
+        'dx': 2.,
         'CFL': 0.5,
         'Manning': Manning,
         'Export_timeStep': 3. * 3600.,        
