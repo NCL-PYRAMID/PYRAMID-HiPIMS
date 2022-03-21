@@ -19,29 +19,45 @@ Newcastle University NE1 7RU
 ## Getting Started
 
 ### Prerequisites
-These frameworks require PyTorch 1.2 or higher. The dependent libs can be found in the requirements.txt. Specifically, it needs:
+#### GPU hardware and CUDA drivers
+0. HiPIMs is a CUDA-enabled application and requires NVidia GPU hardware and drivers.
 
-Linux
-Python 3.7
-PyTorch 1.2
-CUDA 10.0
-GCC 4.9+
+#### Software environment
+HiPIMS is built around PyTorch 1.2 or higher. The dependent packages can be found in the requirements.txt. Specifically, it needs:
 
-### Installation
-a. Creat and activate an anaconda virtual environment 
+Linux  
+Python 3.7  
+PyTorch 1.2  
+CUDA 10.0  
+GCC 4.9+  
 
-conda create --name hipims python=3.7
-conda activate hipims
+a. Install Anaconda
+
+d. Initialise Anaconda to use your preferred login shell
+`conda init bash`
+You will need to log out of this shell and re-log in to ensure that Anaconda works correctly with the shell
+
+
+a. Create and activate an Anaconda virtual environment with Python 3.7
+
+`conda create --name hipims python=3.7`
+`conda activate hipims`
 
 b. Install PyTorch stable or nightly and torchvision following the official instructions.
 
-conda install pytorch==1.2.0 torchvision==0.4.0 cudatoolkit=10.0 -c pytorch
+`conda install pytorch==1.2.0 torchvision==0.4.0 cudatoolkit=10.0 -c pytorch`
 
 c. install the necessary packages
 
 conda install numpy matplotlib pyqt seaborn tqdm kiwisolver
 conda install rasterio pysal pyproj rasterstats geopy cartopy contextily earthpy folium 
 conda install geojson mapboxgl hydrofunctions geocoder tweepy
+
+
+
+
+### Installation
+
 
 d. build the lib
 
