@@ -12,13 +12,19 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 # Main function
 def main():
-    CASE_PATH = os.path.join(os.environ['HOME'], 'NewcastleCivilCentre')
+    CASE_PATH = os.path.join(os.environ['HOME'], 'PYRAMID-HiPIMS/NewcastleCivilCentre')
     RASTER_PATH = os.path.join(CASE_PATH, 'input')
     OUTPUT_PATH = os.path.join(CASE_PATH, 'output')
     Rainfall_data_Path = os.path.join(CASE_PATH, 'input/rain_source_2523.txt')
+    
     Manning = np.array([0.02,0.03,0.03,0.03,0.02,0.03,0.03,0.03,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.03])
+    hydraulic_conductivity = 0.0
+    capillary_head = 0.0
+    water_content_diff = 0.0
+
     Degree = False
     gauges_position = np.array([])
+    
     boundBox = np.array([])
     bc_type = np.array([])
     rasterPath = {
@@ -27,6 +33,7 @@ def main():
         'Rainfall_path': os.path.join(RASTER_PATH, 'RainMask.tif')
     }
     landLevel = 0
+    default_BC = 30
 
     paraDict = {
        'deviceID': 0,
@@ -47,7 +54,11 @@ def main():
         'boundBox': boundBox,
         'bc_type': bc_type,
         'landLevel': landLevel,
-        'Rainfall_data_Path': Rainfall_data_Path
+        'Rainfall_data_Path': Rainfall_data_Path,
+        'hydraulic_conductivity': hydraulic_conductivity,
+        'capillary_head': capillary_head,
+        'water_content_diff': water_content_diff, 
+        'default_BC':default_BC
     }
 
     catchFlood.run(paraDict)
