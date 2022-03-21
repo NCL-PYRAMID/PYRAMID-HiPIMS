@@ -20,6 +20,18 @@ ext_modules = [
         'friction_interface.cpp',
         'frictionCUDA_Kernel.cu',
     ]),
+    CUDAExtension('sedi_c_euler_update', [
+        'sedi_c_euler_update.cpp',
+        'sedi_c_euler_update_kernel.cu',
+    ]),
+    CUDAExtension('sedi_mass_momentum_update', [
+        'sedi_mass_momentum_update.cpp',
+        'sedi_mass_momentum_kernel.cu',
+    ]),
+    CUDAExtension('fluxCalculation_convectionTranport', [
+        'fluxCal_convectionTransport_interface.cpp',
+        'fluxCal_convectionTransport_kernel.cu',
+    ]),
     CUDAExtension('frictionCalculation_implicit', [
         'friction_implicit_interface.cpp',
         'friction_implicit_Kernel.cu',

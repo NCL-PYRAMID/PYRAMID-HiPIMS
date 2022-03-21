@@ -574,6 +574,11 @@ class Godunov:
         sedi_para = np.concatenate(
             (sedi_para, np.ones(paraDict["landUseTypeNumber"])))
         # add sediment density
+        if "rho_w" in paraDict:
+            sedi_para = np.concatenate((sedi_para, paraDict["rho_w"]))
+        else:
+            sedi_para = np.concatenate(
+                (sedi_para, 2.65 * np.ones(paraDict["landUseTypeNumber"])))
 
         if "rho_s" in paraDict:
             sedi_para = np.concatenate((sedi_para, paraDict["rho_s"]))
@@ -604,25 +609,6 @@ class Godunov:
             sedi_para = np.concatenate(
                 (sedi_para,
                  np.zeros(paraDict["landUseTypeNumber"]) + math.pi / 6.0))
-        if "dry_repose_angle" in paraDict:
-            sedi_para = np.concatenate(
-                (sedi_para, paraDict["dry_repose_angle"]))
-        else:
-            sedi_para = np.concatenate(
-                (sedi_para,
-                 np.zeros(paraDict["landUseTypeNumber"]) + math.pi / 3.0))
-        if "soilCohesion" in paraDict:
-            sedi_para = np.concatenate((sedi_para, paraDict["soilCohesion"]))
-        else:
-            sedi_para = np.concatenate(
-                (sedi_para, np.zeros(paraDict["landUseTypeNumber"]) + 4000.0))
-        
-        if "humid_angle" in paraDict:
-            sedi_para = np.concatenate((sedi_para, paraDict["humid_angle"]))
-        else:
-            sedi_para = np.concatenate(
-                (sedi_para, np.zeros(paraDict["landUseTypeNumber"]) +
-                 85. / 180. * math.pi))
         if "ThetaC_calibration" in paraDict:
             sedi_para = np.concatenate(
                 (sedi_para, paraDict["ThetaC_calibration"]))

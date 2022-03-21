@@ -354,22 +354,12 @@ template <typename scalar_t>
 __device__ __forceinline__ void
 boundary_Q_given(scalar_t *field, scalar_t *field_b, const scalar_t *normal,
                  const scalar_t given_qx, const scalar_t given_qy) {
+
   field_b[0] = field[0];
   field_b[4] = field[4];
   field_b[1] = field_b[4] + field_b[0];
   field_b[2] = given_qx;
   field_b[3] = given_qy;
-}
-
-template <typename scalar_t>
-__device__ __forceinline__ void
-boundary_H_given(scalar_t *field, scalar_t *field_b, 
-                 const scalar_t given_depth) {
-  field_b[0] = given_depth;
-  field_b[4] = field[4];
-  field_b[1] = field_b[4] + field_b[0];
-  field_b[2] = field[2];
-  field_b[3] = field[3];
 }
 
 template <typename scalar_t>
@@ -396,14 +386,6 @@ boundary_conditions(const int boundaryType, scalar_t *field, scalar_t *field_b,
   }
   case 7: {
     boundary_Critical_Open(field, field_b, 0.15, 0.02);
-    break;
-  }
-  case 8: {
-    boundary_H_given(field, field_b, given_depth);
-    break;
-  }
-  case 9: {
-    boundary_Q_given(field, field_b, normal, given_qx, given_qy);
     break;
   }
   }
