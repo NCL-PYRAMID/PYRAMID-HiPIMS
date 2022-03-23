@@ -178,7 +178,8 @@ conda install -c conda-forge -y geocoder
 conda install -c conda-forge -y tweepy
 ```
 
-### HiPIMS CUDA Library Compilation and Installation
+### Installation
+#### HiPIMS CUDA Library Compilation and Installation
 The main HiPIMS library consists of `.cpp` and `.cu` code that must be compiled. `setuptools` is used to drive the compilation and installation of the library. The code and installation script is in the `cuda` subdirectory.
 
 During the compilation process the environment variable `CUDA_HOME` is used. Assuming that CUDA 10.2 was installed in the default location then a symbolic link `/usr/local/cuda` is created which points to `/usr/local/cuda-10.2`. The compilation process will default to using `CUDA_HOME=/usr/local/cuda` and will proceed without problem; however, if you installed CUDA to a different directory and / or the symbolic link from `/usr/local/cuda` is not present or points to another CUDA version then this may fail, and you will need to specify `CUDA_HOME` directly or fix the symlink.
@@ -190,28 +191,27 @@ python setup.py install
 ```
 
 ### Running Locally
-
+The DAFNI HiPIMS application is not designed to be run locally.
 
 ### Running Tests
-There is a test python script which runs a singleGPU example case.
+There is a test python script which runs a single GPU example case. Firstly, download the test data from DAFNI, as outlined in `data/inputs/README.md`. Then the test application can be run using
 ```
 cd $HIPIMS_ROOT
 python singleGPU_example.py
 ```
+The results of the simulation should appear in the data/outputs directory.
 
 ## Deployment
-
 ### Local
-A local Docker container that mounts the test data can be built using:
-
+Build the Docker container for the HiPIMS application using a standard `docker build` command.
 ```
 docker build . -t pyramid-hipims
 ```
-
-MISSING
+The container is designed to mount a local directory for reading and writing. For testing locally, download the test data from DAFNI, as outlined in `data/inputs/README.md`. Then the test application can be run using
 ```
-NewcastleCivilCentre/output
+docker run -v "$(pwd)/data:/data" pyramid-hipims
 ```
+Data produced by the application will be in data/outputs. Note that because of the way that Docker permissions work, these data will have `root/root` ownership permissions. You will need to use elevated `sudo` privileges to delete the outputs folder.
 
 ### Production
 #### DAFNI upload
