@@ -1,8 +1,12 @@
-# Python
-**/__pycache__/
+# DAFNI directories
+data/outputs/
+data/inputs/*
+!data/inputs/README.md
 
-# OS specific
-**/.DS_Store
+# Compilation targets
+cuda/build/
+cuda/dist/
+cuda/hipims.egg-info/
 
-# Editor configurations
-**/.vscode/
+# Python compiler
+pythonHipims/__pycache__/

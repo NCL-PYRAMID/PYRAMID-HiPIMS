@@ -12,8 +12,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 # Main function
 def main():
-    #CASE_PATH = os.path.join(os.environ['HOME'], 'PYRAMID-HiPIMS/NewcastleCivilCentre')
-    CASE_PATH = os.path.join(os.getcwd(), 'NewcastleCivilCentre')
+    CASE_PATH = os.path.join(os.getcwd(), 'data')
     RASTER_PATH = os.path.join(CASE_PATH, 'input')
     OUTPUT_PATH = os.path.join(CASE_PATH, 'output')
     Rainfall_data_Path = os.path.join(CASE_PATH, 'input/rain_source_2523.txt')

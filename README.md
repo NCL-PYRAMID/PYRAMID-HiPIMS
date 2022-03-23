@@ -132,7 +132,7 @@ For `bash`, this is
 ```
 conda init bash
 ```
-You will need to log out of this shell and re-log in to ensure that Anaconda works correctly with the shell
+You will need to log out of this shell and re-log in to ensure that Anaconda works correctly with the shell.
 
 #### Anaconda environment configuration
 The Anaconda environment is best created using the `hipims-environment.yml` file, which contains a description of all of the packages in the correct versions.
