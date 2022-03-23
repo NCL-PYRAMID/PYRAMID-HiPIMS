@@ -63,11 +63,11 @@ HiPIMS should work with the latest CUDA Toolkit installation but this deployment
 - CUDA documentation
 
 There are three sources of of the CUDA installers of interest:
-- [The latest version]
+- [The latest version](https://developer.nvidia.com/cuda-downloads)
 - [All archives](https://developer.nvidia.com/cuda-toolkit-archive)
 - [CUDA 10.2 archive](https://developer.nvidia.com/cuda-10.2-download-archive)
 
-If your build machine does not already have CUDA installed or if it is older than version 10.2, then navigate to the [CUDA 10.2 archive](https://developer.nvidia.com/cuda-10.2-download-archive) and download the appropriate **runfile** for your system. Navigate to an appropriate directory and download the installer file and two patches using `wget` in a terminal window.
+If your build machine does not already have CUDA installed or if your CUDA version is older than version 10.2, then navigate to the [CUDA 10.2 archive](https://developer.nvidia.com/cuda-10.2-download-archive) and download the appropriate **runfile** for your system. Navigate to an appropriate directory and download the installer file and two patches using `wget` in a terminal window.
 ```
 wget https://developer.download.nvidia.com/compute/cuda/10.2/Prod/local_installers/cuda_10.2.89_440.33.01_linux.run
 wget https://developer.download.nvidia.com/compute/cuda/10.2/Prod/patches/1/cuda_10.2.1_linux.run
@@ -82,6 +82,13 @@ for the interactive menu version where the installation options can be selected,
 sudo sh cuda_10.2.89_440.33.01_linux.run --silent --toolkit --driver
 ```
 omitting `--driver` if only the Toolkit is needed, i.e. if you do not have NVidia GPU hardware and wish to compile the application only. Other installation options are described in the [CUDA documentation](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html).
+
+Having installed the main CUDA Toolkit, next install the patches:
+```
+sudo sh cuda_10.2.1_linux.run --silent --toolkit
+sudo sh cuda_10.2.1_linux.run --silent --toolkit
+```
+These can also be installed interactively without the `--silent` and `--toolkit` flags if desired.
 
 Finally you will need to add the following to your shell environment variables:
 - `PATH` should include `/usr/local/cuda-10.2/bin`.
@@ -100,52 +107,54 @@ If necessary, uninstall the CUDA Toolkit by running
 cd /usr/local/cuda-10.2/bin
 sudo cuda-uninstaller
 ```
-Alternatively, the following removal steps might be useful:
+Alternatively, the Toolkit can be uninstalled manually if necessary:
 ```
 sudo apt-get --purge remove "*cublas*" "cuda*" "nsight*" 
 sudo apt-get --purge remove "*nvidia*"
 sudo rm -rf /usr/local/cuda*
 ```
 
-
-
 #### Anaconda installation
-HiPIMS is built around PyTorch 1.2 or higher. The dependent packages can be found in the requirements.txt. Specifically, it needs:
+HiPIMS is built around PyTorch 1.2 or higher and uses a number of other Python support packages. [Anaconda](https://www.anaconda.com/) is used to manage the packages needed by HiPIMS, and the dependent packages are listed in an exported Anaconda environment file `hipims-environment.yml`.
 
-Linux  
-Python 3.7  
-PyTorch 1.2  
-CUDA 10.0  
-GCC 4.9+  
-
-
-a. Install Anaconda
+_a. Install Anaconda_  
+If not already present, Anaconda should be installed and updated. The main [Anaconda documentation](https://docs.anaconda.com/anaconda/install/index.html) describes the installation process but the process is summarised here. Download the [Anaconda installation file](https://www.anaconda.com/products/individual?modal=nucleus#linux) to your Downloads folder and install it:
 ```
+sudo apt-get install libgl1-mesa-glx libegl1-mesa libxrandr2 libxrandr2 libxss1 libxcursor1 libxcomposite1 libasound2 libxi6 libxtst6
+cd ~/Downloads
+sudo sh ~/Downloads/Anaconda3-2021.11-Linux-x86_64.sh
 conda update -n base -c defaults conda
 ```
+The name of the Anaconda `.sh` file may be diferent. Follow the prompts, consulting the documentation if necessary.
 
-b. Initialise Anaconda to use your preferred login shell
+_b. Initialise Anaconda to use your preferred login shell_  
+For `bash`, this is
 ```
 conda init bash
 ```
 You will need to log out of this shell and re-log in to ensure that Anaconda works correctly with the shell
 
 #### Anaconda environment configuration
-b. Create and activate an Anaconda virtual environment with Python 3.7. Some of the packages used in the application are only available from `conda-forge`, so all packages will use `conda-forge` as the default installation channel.
+The Anaconda environment is best created using the `hipims-environment.yml` file, which contains a description of all of the packages in the correct versions.
+```
+conda env create -f hipims-environment.yml -y
+conda activate hipims
+```
+
+Alternatively, the following series of commands can create the environment using individual `conda create` instructions.
+
+_a. Create and activate an Anaconda virtual environment with Python 3.7_  
+Some of the packages used in the HiPIMS application are only available from `conda-forge`, so all packages will use `conda-forge` as the default installation channel.
 
 ```
 conda create -c conda-forge -y --name hipims python=3.7
 conda activate hipims
 ```
-
-b. Install pytorch, torchvision and the CUDA toolkit.
-
+_b. Install pytorch, torchvision and the CUDA toolkit._  
 ```
 conda install -c conda-forge -y pytorch==1.2.0 torchvision==0.4.0 cudatoolkit=10.0
 ```
-
-c. Install the python packages used by HiPIMS.
-
+_c. Install the python packages used by HiPIMS._  
 ```
 conda install -c conda-forge -y numpy
 conda install -c conda-forge -y matplotlib
@@ -169,31 +178,26 @@ conda install -c conda-forge -y geocoder
 conda install -c conda-forge -y tweepy
 ```
 
-#### Alternative Anaconda environment
-Alternatively, install from an environment file:
+### HiPIMS CUDA Library Compilation and Installation
+The main HiPIMS library consists of `.cpp` and `.cu` code that must be compiled. `setuptools` is used to drive the compilation and installation of the library. The code and installation script is in the `cuda` subdirectory.
+
+During the compilation process the environment variable `CUDA_HOME` is used. Assuming that CUDA 10.2 was installed in the default location then a symbolic link `/usr/local/cuda` is created which points to `/usr/local/cuda-10.2`. The compilation process will default to using `CUDA_HOME=/usr/local/cuda` and will proceed without problem; however, if you installed CUDA to a different directory and / or the symbolic link from `/usr/local/cuda` is not present or points to another CUDA version then this may fail, and you will need to specify `CUDA_HOME` directly or fix the symlink.
+
+The HiPIMS library is created as follows. `HIPIMS_ROOT` is used here to indicate the root of the repository, it is not necessary to actually set this variable.
 ```
-conda env create -f hipims-environment.yml -y
-conda activate hipims
-```
-
-
-### Installation
-
-
-d. build the lib
-
-set CUDA_HOME
-
-cd [path]/cuda/
+cd $HIMPS_ROOT/cuda/
 python setup.py install
+```
 
 ### Running Locally
 
 
 ### Running Tests
-
-cd ..
+There is a test python script which runs a singleGPU example case.
+```
+cd $HIPIMS_ROOT
 python singleGPU_example.py
+```
 
 ## Deployment
 
