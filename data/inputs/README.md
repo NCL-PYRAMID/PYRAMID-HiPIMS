@@ -34,3 +34,8 @@ directory, and write to the
 ```
 directory. Note the root filesystem slash. The data for analysis will come from a prior model in the PYRAMID workflow, and hence any test data should *not* be included in this directory in the Docker container.
 
+## Test Data
+A test data set is present on DAFNI. This data set is identified as:
+- Title: PYRAMID HiPIMS Test Data Set
+- Dataset ID: 1fa68701-0a4a-4aa7-8e8e-e3f7707c93d6
+
