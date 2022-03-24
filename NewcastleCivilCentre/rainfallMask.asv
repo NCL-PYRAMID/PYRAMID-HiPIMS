@@ -1,9 +1,0 @@
-[Landuse,R] = readgeoraster('Landuse.tif');
-[m,n]=size(Landuse);
-rainfall = Landuse;
-for i = 1:m
-    for j = 1:n
-        rainfall(i,j) = 0; 
-    end
-end
-geotiffwrite('rainfallMask.tif',A,R)
