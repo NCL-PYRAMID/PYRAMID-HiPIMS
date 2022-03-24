@@ -54,5 +54,5 @@ RUN python setup.py install
 
 # Entrypoint, comment out either one of the CMD instructions
 WORKDIR /hipims
-#CMD ["python", "singleGPU_example.py"]
-CMD ["conda", "run", "--no-capture-output", "-n", "hipims", "/bin/bash"]
+CMD ["conda", "run", "-n", "hipims", "python", "singleGPU_example.py"]
+#CMD ["conda", "run", "--no-capture-output", "-n", "hipims", "/bin/bash"]
