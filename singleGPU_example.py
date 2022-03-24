@@ -1,21 +1,38 @@
 ###############################################################################
-# HiPIMS application
-# Xue Tong, Robin Wardle, February 2022
+# HiPIMS sample driver application
+# Xue Tong, Robin Wardle
+# February 2022
+###############################################################################
+
+###############################################################################
+# Load Python packages
 ###############################################################################
 import os, sys
 import torch
 import numpy as np
 from pythonHipims import CatchFlood_main as catchFlood
 
+###############################################################################
 # Add to module path
+###############################################################################
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
+###############################################################################
 # Main function
+###############################################################################
 def main():
-    CASE_PATH = os.path.join(os.getcwd(), 'data')
-    RASTER_PATH = os.path.join(CASE_PATH, 'input')
-    OUTPUT_PATH = os.path.join(CASE_PATH, 'output')
-    Rainfall_data_Path = os.path.join(CASE_PATH, 'input/rain_source_2523.txt')
+    # Paths setup
+    # Base data path set depending on whether in Docker container or not
+    platform = os.getenv("PLATFORM")
+    if platform=="docker":
+        CASE_PATH = os.getenv("CASE_PATH", "/data")
+    else:
+        CASE_PATH = os.getenv("CASE_PATH", "./data")
+
+    # Input and Output data paths
+    RASTER_PATH = os.path.join(CASE_PATH, 'inputs')
+    OUTPUT_PATH = os.path.join(CASE_PATH, 'outputs')
+    Rainfall_data_Path = os.path.join(RASTER_PATH, 'rain_source_2523.txt')
     
     Manning = np.array([0.02,0.03,0.03,0.03,0.02,0.03,0.03,0.03,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.03])
     hydraulic_conductivity = 0.0
