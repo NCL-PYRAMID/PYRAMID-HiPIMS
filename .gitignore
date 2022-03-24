@@ -9,4 +9,10 @@ cuda/dist/
 cuda/hipims.egg-info/
 
 # Python compiler
-pythonHipims/__pycache__/
+**/__pycache__/
+
+# OS specific
+**/.DS_Store
+
+# Editor configurations
+**/.vscode/
