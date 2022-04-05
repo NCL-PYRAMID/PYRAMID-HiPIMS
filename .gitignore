@@ -3,6 +3,9 @@ data/outputs/
 data/inputs/*
 !data/inputs/README.md
 
+# DAFNI uploads
+*.tar.gz
+
 # Compilation targets
 cuda/build/
 cuda/dist/

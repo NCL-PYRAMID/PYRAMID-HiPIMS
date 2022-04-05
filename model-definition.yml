@@ -1,0 +1,35 @@
+kind: model
+api_version: v1beta1
+metadata:
+  display_name: HiPIMS for PYRAMID
+  name: pyramid-hipims
+  summary: Extended HiPIMS for PYRAMID that includes floating debris modelling
+  type: model
+  publisher: Newcastle University / Loughborough University
+  description: >
+    This version of HiPIMS for the PYRAMID project includes modelling of
+    floating debris. The debris description needs to be supplied as additional
+    data to the simulation and is likely to be supplied from another
+    workflow step.
+spec:
+  resources:
+    use_gpu: true
+  inputs:
+    parameters:
+      - name: simulation_name
+        title: Simulation Name
+        description: A name for the simulation
+        type: string
+        required: true
+        default: 'PYRAMID HiPIMS simulation'
+    dataslots:
+      - name: PYRAMID HiPIMS Test Data Set
+        description: DEM, rainfall and other data for testing
+        default:
+          - f3b44124-d24b-43d0-9703-bbd79fb8825c
+        path: inputs
+        required: true
+  outputs:
+    datasets:
+      - name: PYRAMID HiPIMS Test Data Set - Simulation Results
+        description: Set of files describing the flooding at time steps through the analysis
