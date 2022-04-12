@@ -201,6 +201,40 @@ python singleGPU_example.py
 ```
 The results of the simulation should appear in the data/outputs directory.
 
+### Testing on an Azure VM
+If you have no local GPU hardware to test the application on, then an Azure GPU-enabled Virtual Machine (VM) can be created using Terraform.
+
+```
+cd tf
+terraform plan
+terraform apply
+```
+
+Once finished testing, remove the VM using
+```
+terraform destroy
+```
+
+*It is extremely important that you remove the VM once testing is complete as running an Azure VM is very expensive!*
+
+On creation of the Azure VM, an external IP address and key pair are created. The IP address is displayed by Terraform on completion of the `apply` procedure, and it can also be found through the Azure portal - make a copy of this onto the clipboard. The private key is stored in Terraform state and is not displayed on the terminal. To recover the key, first make sure that `jq` is installed:
+```
+sudo apt install jq
+```
+Next, recover the VM private key from the terraform state using the following shell commands:
+```
+mkdir ~/.ssh
+terraform show -json | \
+jq -r '.values.root_module.resources[].values | select(.private_key_pem) |.private_key_pem' \
+> ~/.ssh/pyramidvm_private_key.pem
+chmod og-rw ~/.ssh/pyramidvm_private_key.pem
+```
+Then you can log into the VM, which has the hostname `pyramidvm` using
+```
+ssh -i ~/.ssh/pyramidvm_private_key.pem <ip address> -l pyramidtestuser
+```
+This private key is usable until the VM is destroyed - he key will need to be recovered again for each time that terraform is used to recreate the VM in Azure.
+
 ## Deployment
 ### Local
 Build the Docker container for the HiPIMS application using a standard `docker build` command.

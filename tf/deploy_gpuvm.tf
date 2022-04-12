@@ -132,12 +132,12 @@ resource "azurerm_linux_virtual_machine" "gpuvm" {
         version   = "latest"
     }
 
-    computer_name                   = "pyramidvm"
-    admin_username                  = "pyramid"
+    computer_name                   = "pyramidtestvm"
+    admin_username                  = "pyramidtestuser"
     disable_password_authentication = true
     
     admin_ssh_key {
-        username   = "pyramid"
+        username   = "pyramidtestuser"
         public_key = tls_private_key.ssh_key.public_key_openssh
     }
     
