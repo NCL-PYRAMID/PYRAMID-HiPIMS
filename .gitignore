@@ -1,3 +1,6 @@
+###############################################################################
+# DAFNI
+###############################################################################
 # DAFNI directories
 data/outputs/
 data/inputs/*
@@ -6,6 +9,9 @@ data/inputs/*
 # DAFNI uploads
 *.tar.gz
 
+###############################################################################
+# Application
+###############################################################################
 # Compilation targets
 cuda/build/
 cuda/dist/
@@ -19,3 +25,20 @@ cuda/hipims.egg-info/
 
 # Editor configurations
 **/.vscode/
+
+###############################################################################
+# Terraform
+###############################################################################
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# .tfvars files
+*.tfvars
+
+# Temporary files, logs etc
+**/*.swp
+**/*.log
