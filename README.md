@@ -39,11 +39,11 @@ sudo apt update
 sudo apt install wget
 ```
 
-#### GCC / G++ versions
+#### GCC and G++ versions
 CUDA 10.2 Toolkit requires GCC and G++ for its installation. GCC versions later than 8 are not supported by CUDA 10.2. This deployment uses GCC 7. Under Linux it is possible to select compiler versions using `update-alternatives`. To install GCC 7 as the default compiler under Linux, install and select it with the following commands:
 ```
-sudo apd update
-sudo apt install gcc-7 g++-7
+sudo apt update
+sudo apt install -y gcc-7 g++-7
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 10
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 10
 ```
@@ -202,8 +202,8 @@ python singleGPU_example.py
 The results of the simulation should appear in the data/outputs directory.
 
 ### Testing on an Azure VM
-If you have no local GPU hardware to test the application on, then an Azure GPU-enabled Virtual Machine (VM) can be created using Terraform.
-
+#### _Creating the Virtual Machine_
+If you have no local GPU hardware to test the application on, then an Azure GPU-enabled Virtual Machine (VM) can be created using Terraform. Note that the Terraform configuration files use the NvidiaGpuDriverLinux extension to install the NVidia GPU libraries, so you won't need to do this manually once the VM is up and running.
 ```
 cd tf
 terraform plan
@@ -214,14 +214,13 @@ Once finished testing, remove the VM using
 ```
 terraform destroy
 ```
-
 *It is extremely important that you remove the VM once testing is complete as running an Azure VM is very expensive!*
 
 On creation of the Azure VM, an external IP address and key pair are created. The IP address is displayed by Terraform on completion of the `apply` procedure, and it can also be found through the Azure portal - make a copy of this onto the clipboard. The private key is stored in Terraform state and is not displayed on the terminal. To recover the key, first make sure that `jq` is installed:
 ```
 sudo apt install jq
 ```
-Next, recover the VM private key from the terraform state using the following shell commands:
+Next, [recover the VM private key from the terraform state](https://devops.stackexchange.com/questions/14493/get-private-key-from-terraform-state) using the following shell commands:
 ```
 mkdir ~/.ssh
 terraform show -json | \
@@ -233,7 +232,134 @@ Then you can log into the VM, which has the hostname `pyramidvm` using
 ```
 ssh -i ~/.ssh/pyramidvm_private_key.pem <ip address> -l pyramidtestuser
 ```
-This private key is usable until the VM is destroyed - he key will need to be recovered again for each time that terraform is used to recreate the VM in Azure.
+This private key is usable until the VM is destroyed - the key will need to be recovered again for each time that terraform is used to recreate the VM in Azure.
+
+#### _Setting up Docker on the Virtual Machine_
+By default, Azure VMs are supplied with an attached temporary disk under `/mnt'. This should be sufficient for application testing purposes as the intention with the VM is to create the VM, clone and build the repo, test the application, and delete the VM. The Terraform file for the VM does contain some commented-out configuration for adding another disk to the Azure resource group that can be mounted to the VM filesystem, if this is needed.
+
+[Docker](https://www.docker.com/) will need to be installed on the VM, and also the default directory under which it stores images needs to be moved to the temporary disk under `/mnt`, because the OS disk is not large enough to hold the HiPIMS docker images. Note that all Docker commands will need to be run under `sudo`.
+
+Firstly, [install Docker](https://docs.docker.com/engine/install/ubuntu/):
+
+```
+cd
+sudo apt update
+sudo apt upgrade -y
+sudo apt autoremove -y
+sudo apt-get install ca-certificates curl gnupg lsb-release
+```
+Add Docker's official GPG key:
+```
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+```
+This command sets up the stable repository:
+```
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+```
+Finally install the Docker Engine and check that it is working correctly:
+```
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io
+sudo docker run hello-world
+```
+
+Moving the Docker images directory involves a bit of work.Rather than attempting to entirely move the default location, which involves changing Docker's configuration files, opting for a [bind mount solution](https://www.ibm.com/docs/en/cloud-private/3.1.0?topic=pyci-specifying-default-docker-storage-directory-by-using-bind-mount) is a bit less painless. First, remove any running containers and images:
+```
+sudo docker rm -f $(sudo docker ps -aq)
+sudo docker rmi -f $(sudo docker images -q)
+```
+Stop the Docker service and remove the Docker storage directory
+```
+sudo systemctl stop docker
+sudo rm -rf /var/lib/docker
+```
+Create a new Docker storage directory and bind it to a directory on `/mnt`:
+```
+sudo mkdir /var/lib/docker
+sudo mkdir /mnt/docker
+sudo mount --rbind /mnt/docker /var/lib/docker
+```
+Restart the Docker service:
+```
+sudo systemctl start docker
+```
+Alternatively - Create the bind mount point first, and then install Docker!
+
+Finally, Docker needs to be prepared for [using the GPU hardware](https://www.cloudsavvyit.com/14942/how-to-use-an-nvidia-gpu-with-docker-containers/). Check that the NVidia drivers are actually installed using `nvidia-smi`:
+```
+pyramidtestuser@pyramidtestvm:/mnt/PYRAMID-HiPIMS$ nvidia-smi
+Wed Apr 13 12:48:49 2022       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 510.47.03    Driver Version: 510.47.03    CUDA Version: 11.6     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  Tesla V100-PCIE...  On   | 00000001:00:00.0 Off |                  Off |
+| N/A   30C    P0    24W / 250W |      0MiB / 16384MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
+
+```
+We then need to add the NVidia Container Toolkit for Docker, which integrates into the Docker Engine to provide GPU support.
+```
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
+   && curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add - \
+   && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+sudo apt update
+sudo apt install -y nvidia-docker2
+sudo systemctl restart docker
+```
+At this point we can test the Docker NVidia integration to make sure it is working:
+```
+pyramidtestuser@pyramidtestvm:/mnt/PYRAMID-HiPIMS$ sudo docker run -it --gpus all nvidia/cuda:11.4.0-base-ubuntu20.04 nvidia-smi
+Wed Apr 13 12:53:40 2022       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 510.47.03    Driver Version: 510.47.03    CUDA Version: 11.6     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  Tesla V100-PCIE...  On   | 00000001:00:00.0 Off |                  Off |
+| N/A   30C    P0    24W / 250W |      0MiB / 16384MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
+
+```
+The Docker and NVidia integration should now be ready to run the application.
+
+#### _Cloning the application repository and building the app_
+Git should be installed on the Virtual Machine, and the next thing to do is to clone the HiPIMS repository for building the application. Firstly you will need to enable access to the repository. The easiest way is probably to create a Personal Access Token (PAT) in GitHub, by following the [GitHub documentation](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token). Having created the PAT you will then be able to clone the repo. When running `sudo git clone` you will enter your GitHub username but then instead of a password, paste in the PAT from GitHub. Note that the PAT is a one-time only generation and you will not be able to see it again once you navigate away from the PAT page, so make sure you copy it to clone the repo or you will end up having to regenerate it.
+```
+cd /mnt
+sudo git clone https://github.com/NCL-PYRAMID/PYRAMID-HiPIMS.git
+```
+
+Finally we can build the HiPIMS Docker container.
+```
+cd PYRAMID-HiPIMS
+sudo docker build . -t pyramid-hipims
+```
 
 ## Deployment
 ### Local

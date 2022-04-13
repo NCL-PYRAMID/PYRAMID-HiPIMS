@@ -112,6 +112,8 @@ resource "tls_private_key" "ssh_key" {
 #   - UbuntuServer 20.04 doesn't seem to be available
 #
 ###############################################################################
+
+# Virtual machine
 resource "azurerm_linux_virtual_machine" "gpuvm" {
     name                    = "cuda_testing_gpuvm"
     location                = azurerm_resource_group.rg.location
@@ -120,16 +122,16 @@ resource "azurerm_linux_virtual_machine" "gpuvm" {
     size                    = "Standard_NC6s_v3"
 
     os_disk {
-        name                 = "OsDisk"
-        caching              = "ReadWrite"
-        storage_account_type = "Standard_LRS"
+        name                    = "OsDisk"
+        caching                 = "ReadWrite"
+        storage_account_type    = "Standard_LRS"
     }
 
     source_image_reference {
-        publisher = "Canonical"
-        offer     = "UbuntuServer"
-        sku       = "18.04-LTS"
-        version   = "latest"
+        publisher               = "Canonical"
+        offer                   = "UbuntuServer"
+        sku                     = "18.04-LTS"
+        version                 = "latest"
     }
 
     computer_name                   = "pyramidtestvm"
@@ -145,3 +147,46 @@ resource "azurerm_linux_virtual_machine" "gpuvm" {
         storage_account_uri = azurerm_storage_account.gpuvm_sa.primary_blob_endpoint
     }
 }
+
+# Daily shutdown - for safety in case the VM is left on
+# See https://jackstromberg.com/2017/01/list-of-time-zones-consumed-by-azure/
+resource "azurerm_dev_test_global_vm_shutdown_schedule" "shutdown" {
+    virtual_machine_id      = azurerm_linux_virtual_machine.gpuvm.id
+    location                = azurerm_resource_group.rg.location
+    enabled                 = true
+    
+    daily_recurrence_time   = "1930"
+    timezone                = "GMT Standard Time"
+    
+    notification_settings {
+        enabled             = false
+        time_in_minutes     = 30
+    }
+}
+
+# Virtual machine extension to install the NVidia GPU drivers
+resource "azurerm_virtual_machine_extension" "NvidiaGpuDriverLinux" {
+    name                        = "NvidiaGpuDriverLinux"
+    virtual_machine_id          = azurerm_linux_virtual_machine.gpuvm.id
+    publisher                   = "Microsoft.HpcCompute"
+    type                        = "NvidiaGpuDriverLinux"
+    type_handler_version        = "1.2"
+    auto_upgrade_minor_version  = true
+}
+
+# Attached disk - needed for docker build as OS disk is only 32GB
+#resource "azurerm_managed_disk" "build" {
+#    name                 = "pyramidtestvm-build"
+#    location             = azurerm_resource_group.rg.location
+#    resource_group_name  = azurerm_resource_group.rg.name
+#    storage_account_type = "Standard_LRS"
+#    create_option        = "Empty"
+#    disk_size_gb         = 1024
+#}
+#
+#resource "azurerm_virtual_machine_data_disk_attachment" "build" {
+#    managed_disk_id    = azurerm_managed_disk.build.id
+#    virtual_machine_id = azurerm_linux_virtual_machine.gpuvm.id
+#    lun                = "10"
+#    caching            = "ReadWrite"
+#}

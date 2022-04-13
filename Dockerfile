@@ -53,6 +53,7 @@ WORKDIR /hipims/cuda
 RUN python setup.py install
 
 # Entrypoint, comment out either one of the CMD instructions
+ENV PLATFORM="docker"
 WORKDIR /hipims
 CMD ["conda", "run", "-n", "hipims", "python", "singleGPU_example.py"]
 #CMD ["conda", "run", "--no-capture-output", "-n", "hipims", "/bin/bash"]
