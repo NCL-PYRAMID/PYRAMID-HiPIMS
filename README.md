@@ -349,7 +349,7 @@ Wed Apr 13 12:53:40 2022
 The Docker and NVidia integration should now be ready to run the application.
 
 #### _Cloning the application repository and building the app_
-Git should be installed on the Virtual Machine, and the next thing to do is to clone the HiPIMS repository for building the application. Firstly you will need to enable access to the repository. The easiest way is probably to create a Personal Access Token (PAT) in GitHub, by following the [GitHub documentation](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token). Having created the PAT you will then be able to clone the repo. When running `sudo git clone` you will enter your GitHub username but then instead of a password, paste in the PAT from GitHub. Note that the PAT is a one-time only generation and you will not be able to see it again once you navigate away from the PAT page, so make sure you copy it to clone the repo or you will end up having to regenerate it.
+Git should be installed on the Virtual Machine, and the next thing to do is to clone the HiPIMS repository for building the application. Firstly you will need to enable access to the repository. The easiest way is probably to create a Personal Access Token (PAT) in GitHub, by following the [GitHub documentation](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token). Having created the PAT you will then be able to clone the repo. When running the `sudo git clone` command below you will enter your GitHub username but then instead of a password, paste in the PAT from GitHub. Note that the PAT is a one-time only generation and you will not be able to see it again once you navigate away from the PAT page, so make sure you copy it to clone the repo or you will end up having to regenerate it.
 ```
 cd /mnt
 sudo git clone https://github.com/NCL-PYRAMID/PYRAMID-HiPIMS.git
@@ -360,6 +360,12 @@ Finally we can build the HiPIMS Docker container.
 cd PYRAMID-HiPIMS
 sudo docker build . -t pyramid-hipims
 ```
+
+To run the application on the VM, we need to transfer the test data from DAFNI to the VM (TO DO). Then we can run the application using
+```
+sudo docker run -it --gpus all -v "$(pwd)/data:/data" pyramid-hipims
+```
+Note the use of the `--gpus` flag to tell the Docker Engine that it needs to make use of the NVidia drivers.
 
 ## Deployment
 ### Local
