@@ -21,7 +21,7 @@ RUN apt upgrade -y
 RUN wget https://repo.anaconda.com/archive/Anaconda3-2020.11-Linux-x86_64.sh -O ~/anaconda.sh
 RUN /bin/bash ~/anaconda.sh -b -p /opt/conda
 RUN ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
-RUN conda update -n base -c defaults conda
+RUN conda update -y -n base -c defaults conda
 # Use conda-forge and strict channel priority (setup .condarc for this)
 RUN echo -e \
 "channel_priority: strict\n\
