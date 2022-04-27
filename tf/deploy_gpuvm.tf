@@ -175,25 +175,30 @@ resource "azurerm_virtual_machine_extension" "NvidiaGpuDriverLinux" {
 }
 
 # Script extension to set up Docker
-locals {
-    installation_script         = try(file("./install_docker.sh"), null)
-    base64_encoded_script       = base64encode(local.installation_script)
-}
+# This interferes with the GPU drivers, so disabled for now until I can figure out what's going on
+# See:
+#   - https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/custom-script-linux
+#   - https://www.reddit.com/r/Terraform/comments/mgobi8/run_powershell_script_on_azure_vm_creation/
+#
+#locals {
+#    installation_script         = try(file("./install_docker.sh"), null)
+#    base64_encoded_script       = base64encode(local.installation_script)
+#}
 
-resource "azurerm_virtual_machine_extension" "InstallDocker" {
-    name                        = "InstallDocker"
-    virtual_machine_id          = azurerm_linux_virtual_machine.gpuvm.id
-    publisher                   = "Microsoft.Azure.Extensions"
-    type                        = "CustomScript"
-    type_handler_version        = "2.0"
-    auto_upgrade_minor_version  = true
-
-    settings = <<SETTINGS
-    {
-        "script": "${local.base64_encoded_script}"
-    }
-    SETTINGS
-}
+#resource "azurerm_virtual_machine_extension" "InstallDocker" {
+#    name                        = "InstallDocker"
+#    virtual_machine_id          = azurerm_linux_virtual_machine.gpuvm.id
+#    publisher                   = "Microsoft.Azure.Extensions"
+#    type                        = "CustomScript"
+#    type_handler_version        = "2.0"
+#    auto_upgrade_minor_version  = true
+#
+#    settings = <<SETTINGS
+#    {
+#        "script": "${local.base64_encoded_script}"
+#    }
+#    SETTINGS
+#}
 
 # Attached disk - needed for docker build as OS disk is only 32GB
 #resource "azurerm_managed_disk" "build" {
