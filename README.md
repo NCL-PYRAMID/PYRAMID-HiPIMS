@@ -239,9 +239,16 @@ By default, Azure VMs are supplied with an attached temporary disk under `/mnt'.
 
 [Docker](https://www.docker.com/) will need to be installed on the VM, and also the default directory under which it stores images needs to be moved to the temporary disk under `/mnt`, because the OS disk is not large enough to hold the HiPIMS docker images. Note that all Docker commands will need to be run under `sudo`.
 
-Firstly, wait until the Azure Extension has installed the cuda toolkit. Use the following command until the toolkit has finished installing.
+Firstly, wait until the Azure Extension has installed the cuda toolkit. Use the following command to wait until the toolkit has finished installing.
 ```
-ps aux | grep -i apt
+if [ 1 ]
+then
+while [ $(ps aux | grep -i apt | wc -l) -gt 1 ]
+do sleep 10
+echo 'Still setting up ...'
+done
+echo 'CUDA toolkit installed'
+fi
 ```
 
 Then, [install Docker](https://docs.docker.com/engine/install/ubuntu/):
