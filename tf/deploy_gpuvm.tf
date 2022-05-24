@@ -33,7 +33,7 @@ resource "azurerm_public_ip" "publicip" {
     name                    = "publicip"
     location                = azurerm_resource_group.rg.location
     resource_group_name     = azurerm_resource_group.rg.name
-    allocation_method       = "Dynamic"
+    allocation_method       = "Static"
 }
 
 # Network Security Group and rule
@@ -170,20 +170,22 @@ resource "azurerm_virtual_machine_extension" "NvidiaGpuDriverLinux" {
     virtual_machine_id          = azurerm_linux_virtual_machine.gpuvm.id
     publisher                   = "Microsoft.HpcCompute"
     type                        = "NvidiaGpuDriverLinux"
-    type_handler_version        = "1.2"
+    type_handler_version        = "1.6"
     auto_upgrade_minor_version  = true
 }
 
 # Script extension to set up Docker
 # This interferes with the GPU drivers, so disabled for now until I can figure out what's going on
+# Update - use depends_on field
 # See:
 #   - https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/custom-script-linux
 #   - https://www.reddit.com/r/Terraform/comments/mgobi8/run_powershell_script_on_azure_vm_creation/
+#   - https://stackoverflow.com/questions/54088476/terraform-azurerm-virtual-machine-extension
 #
-#locals {
-#    installation_script         = try(file("./install_docker.sh"), null)
-#    base64_encoded_script       = base64encode(local.installation_script)
-#}
+locals {
+    installation_script         = try(file("./install_docker.sh"), null)
+    base64_encoded_script       = base64encode(local.installation_script)
+}
 
 #resource "azurerm_virtual_machine_extension" "InstallDocker" {
 #    name                        = "InstallDocker"
@@ -198,6 +200,10 @@ resource "azurerm_virtual_machine_extension" "NvidiaGpuDriverLinux" {
 #        "script": "${local.base64_encoded_script}"
 #    }
 #    SETTINGS
+#
+#    depends_on = [
+#        azurerm_virtual_machine_extension.NvidiaGpuDriverLinux
+#    ]
 #}
 
 # Attached disk - needed for docker build as OS disk is only 32GB
