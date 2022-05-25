@@ -50,7 +50,7 @@ def main():
         'Rainfall_path': os.path.join(RASTER_PATH, 'RainMask.tif')
     }
     landLevel = 0
-    default_BC = 30
+    default_BC = 60
 
     paraDict = {
        'deviceID': 0,
