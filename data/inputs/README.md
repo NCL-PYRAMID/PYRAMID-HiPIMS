@@ -23,7 +23,7 @@ directory, and write to the
 ```
 directory. Note the root filesystem slash. The `/data` directory in the Docker container should be mapped to the `$HIPIMS_ROOT/data` directory. The test data should *not* be copied to this directory in the Docker container.
 
-## Running the application on HiPIMS
+## Running the application on DAFNI
 As above, the application will read from the
 ```
 /data/inputs
