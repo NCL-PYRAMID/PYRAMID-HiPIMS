@@ -23,11 +23,12 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 def main():
     # Paths setup
     # Base data path set depending on whether in Docker container or not
-    platform = os.getenv("PLATFORM")
+    platform = os.getenv("HIPIMS_PLATFORM")
     if platform=="docker":
         CASE_PATH = os.getenv("CASE_PATH", "/data")
     else:
         CASE_PATH = os.getenv("CASE_PATH", "./data")
+    print("Data path: {CASE_PATH}")
 
     # Input and Output data paths
     RASTER_PATH = os.path.join(CASE_PATH, 'inputs')

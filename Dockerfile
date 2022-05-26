@@ -38,7 +38,7 @@ RUN conda env create -f hipims-environment.yml
 #ENV CUDA_ROOT /usr/local/cuda/bin
 
 # Need this if we want to use RUN commands in the proper environment
-SHELL ["conda", "run", "-n", "hipims", "/bin/bash", "-c"]
+SHELL ["conda", "run", "-n", "hipims", "--no-capture-output", "/bin/bash", "-c"]
 
 # Unused packages and channels, for reference
 #RUN conda config --add channels conda-forge pytorch
@@ -53,7 +53,7 @@ WORKDIR /hipims/cuda
 RUN python setup.py install
 
 # Entrypoint, comment out either one of the CMD instructions
-ENV PLATFORM="docker"
+ENV HIPIMS_PLATFORM="docker"
 WORKDIR /hipims
-CMD ["conda", "run", "-n", "hipims", "python", "singleGPU_example.py"]
+CMD ["conda", "run", "-n", "hipims", "--no-capture-output", "python", "singleGPU_example.py"]
 #CMD ["conda", "run", "--no-capture-output", "-n", "hipims", "/bin/bash"]
