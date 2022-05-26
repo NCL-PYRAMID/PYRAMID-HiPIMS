@@ -28,7 +28,7 @@ def main():
         CASE_PATH = os.getenv("CASE_PATH", "/data")
     else:
         CASE_PATH = os.getenv("CASE_PATH", "./data")
-    print("Data path: {CASE_PATH}")
+    print(f"Data path: {CASE_PATH}")
 
     # Input and Output data paths
     RASTER_PATH = os.path.join(CASE_PATH, 'inputs')
