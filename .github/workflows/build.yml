@@ -24,7 +24,7 @@ jobs:
     steps:
       # Checks-out the repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout
-      - uses: actions/checkout@v3
+        uses: actions/checkout@v3
 
       # Build the docker container
       - name: Build Docker container
