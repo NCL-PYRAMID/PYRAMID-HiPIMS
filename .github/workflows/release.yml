@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Free disk space
-        run: echo ${PWD}; /bin/bash ${PWD}/free_disk_space.sh
+        run: ls -lh; echo ${PWD}; /bin/bash ${PWD}/free_disk_space.sh
         
       - name: Check out the repo
         uses: actions/checkout@v3
