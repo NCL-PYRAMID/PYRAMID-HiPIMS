@@ -1,0 +1,34 @@
+name: Upload to DAFNI
+
+on:
+  release:
+    types: [published]
+
+  workflow_dispatch:
+  
+jobs:
+  release:
+    name: Upload to DAFNI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Docker Build
+        run: docker build . -t pyramid-hipims
+
+      - name: Compress docker image
+        run: docker save pyramid-hipims | gzip > pyramid-hipims.tar.gz
+
+      - name: Set tag as env
+        run: echo "TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Upload to DAFNI
+        uses: dafnifacility/dafni-model-uploader@v1.9
+        with:
+          definition-path: './model-definition.yml'
+          image-path: './pyramid-hipims.tar.gz'
+          username: ${{ secrets.DAFNI_ACCOUNT_USERNAME }}
+          password: ${{ secrets.DAFNI_ACCOUNT_PASSWORD }}
+          version-message: ${{ env.TAG }}
+          parent-model: "914e0525-475d-4161-bea0-17f49f308563"
