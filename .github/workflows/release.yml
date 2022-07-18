@@ -29,8 +29,8 @@ jobs:
       - name: Upload to DAFNI
         uses: dafnifacility/dafni-model-uploader@v1.9
         with:
-          definition-path: './model-definition.yml'
-          image-path: './pyramid-hipims.tar.gz'
+          definition-path: ./model-definition.yml
+          image-path: ./pyramid-hipims.tar.gz
           username: ${{ secrets.DAFNI_SERVICE_ACCOUNT_USERNAME }}
           password: ${{ secrets.DAFNI_SERVICE_ACCOUNT_PASSWORD }}
           version-message: ${{ env.TAG }}
