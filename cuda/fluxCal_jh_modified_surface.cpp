@@ -12,7 +12,8 @@ void fluxCalculation_cuda(at::Tensor wetMask, at::Tensor h_flux,
                           at::Tensor qx_flux, at::Tensor qy_flux, at::Tensor h,
                           at::Tensor wl, at::Tensor z, at::Tensor qx,
                           at::Tensor qy, at::Tensor index, at::Tensor normal,
-                          at::Tensor given_depth, at::Tensor given_discharge,
+                          at::Tensor given_depth, at::Tensor given_wl,  
+                          at::Tensor given_discharge,
                           at::Tensor dx, at::Tensor t, at::Tensor dt);
 
 // C++ interface
@@ -29,6 +30,7 @@ void fluxCalculation_jh_modified_surface(at::Tensor wetMask, at::Tensor h_flux,
                               at::Tensor h, at::Tensor wl, at::Tensor z,
                               at::Tensor qx, at::Tensor qy, at::Tensor index,
                               at::Tensor normal, at::Tensor given_depth,
+                              at::Tensor given_wl,
                               at::Tensor given_q, at::Tensor dx, at::Tensor t,
                               at::Tensor dt) {
   CHECK_INPUT(h);
@@ -42,11 +44,12 @@ void fluxCalculation_jh_modified_surface(at::Tensor wetMask, at::Tensor h_flux,
   CHECK_INPUT(normal);
   CHECK_INPUT(given_q);
   CHECK_INPUT(given_depth);
+  CHECK_INPUT(given_wl);
   CHECK_INPUT(dt);
   CHECK_INPUT(t);
 
   fluxCalculation_cuda(wetMask, h_flux, qx_flux, qy_flux, h, wl, z, qx, qy,
-                       index, normal, given_depth, given_q, dx, t, dt);
+                       index, normal, given_depth, given_wl, given_q, dx, t, dt);
 }
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {

@@ -260,13 +260,15 @@ hllcFluxSolver(scalar_t *field_c_h_z, scalar_t *field_r_h_z, scalar_t *field_l,
 }
 
 template <typename scalar_t>
-__device__ __forceinline__ void boundary_WallNonSlip(scalar_t *field,
-                                                     scalar_t *field_b) {
+__device__ __forceinline__ void 
+boundary_WallNonSlip(scalar_t *field, scalar_t *field_b, const scalar_t *normal) {
   field_b[0] = field[0];
   field_b[1] = field[1];
   field_b[4] = field[4];
-  field_b[2] = 0.0;
-  field_b[3] = 0.0;
+  field_b[2] = (normal[1] * normal[1] - normal[0] * normal[0]) * field[2];
+  field_b[3] = - (normal[0] * normal[0] - normal[1] * normal[1]) * field[3];
+  // field_b[2] = 0.0;
+  // field_b[3] = 0.0;
 }
 
 template <typename scalar_t>
@@ -274,19 +276,18 @@ __device__ __forceinline__ void
 boundary_WallSlip(scalar_t *field, scalar_t *field_b, const scalar_t *normal) {
   field_b[0] = field[0];
   field_b[1] = field[1];
-  field_b[4] = field[4];
-  // field_b[2] = (normal[1] * normal[1] - normal[0] * normal[0]) * field[2];
-  // field_b[3] = (normal[0] * normal[0] - normal[1] * normal[1]) * field[3];
-  field_b[2] = (normal[0] * normal[0] - normal[1] * normal[1]) * field[2];
-  field_b[3] = (normal[1] * normal[1] - normal[0] * normal[0]) * field[3];
+  field_b[4] = field[4]; 
+  field_b[2] = (normal[1] * normal[1] - normal[0] * normal[0]) * field[2] ;
+  field_b[3] = (normal[0] * normal[0] - normal[1] * normal[1]) * field[3] ;
 }
 
 template <typename scalar_t>
 __device__ __forceinline__ void boundary_Open(scalar_t *field,
                                               scalar_t *field_b) {
-  field_b[0] = field[0];
-  field_b[1] = field[1];
+  // H = 0, WL = 1, QX = 2, QY = 3, Z = 4 
+  field_b[0] = 0.0;
   field_b[4] = field[4];
+  field_b[1] = field[4] + field_b[0];
   field_b[2] = field[2];
   field_b[3] = field[3];
 }
@@ -355,7 +356,12 @@ __device__ __forceinline__ void
 boundary_Q_given(scalar_t *field, scalar_t *field_b, const scalar_t *normal,
                  const scalar_t given_qx, const scalar_t given_qy) {
 
-  field_b[0] = field[0];
+  if (field[0] < 1e-6){
+    field_b[0] = 0.1;
+  }
+  else{
+    field_b[0] = field[0];
+  }
   field_b[4] = field[4];
   field_b[1] = field_b[4] + field_b[0];
   field_b[2] = given_qx;
@@ -364,12 +370,50 @@ boundary_Q_given(scalar_t *field, scalar_t *field_b, const scalar_t *normal,
 
 template <typename scalar_t>
 __device__ __forceinline__ void
+boundary_H_given(scalar_t *field, scalar_t *field_b, const scalar_t given_depth) {
+
+  field_b[0] = given_depth;
+  field_b[4] = field[4];
+  field_b[1] = field_b[4] + field_b[0];
+  field_b[2] = field[2];
+  field_b[3] = field[3];
+}
+
+template <typename scalar_t>
+__device__ __forceinline__ void
+boundary_wl_given(scalar_t *field, scalar_t *field_b, const scalar_t given_wl) {
+  // H = 0, WL = 1, QX = 2, QY = 3, Z = 4 
+  field_b[4] = field[4];
+  field_b[1] = given_wl > field_b[4] ? given_wl : field_b[4];
+  field_b[0] = field_b[1] - field_b[4];
+  field_b[2] = field[2];
+  field_b[3] = field[3];
+  // printf("water level = %g \t h = %g \t dem = %g \n", field_b[1], field_b[0], field_b[4]);
+  
+}
+
+template <typename scalar_t>
+__device__ __forceinline__ void
+boundary_fall(scalar_t *field, scalar_t *field_b) {
+  // H = 0, WL = 1, QX = 2, QY = 3, Z = 4 
+  field_b[4] = field[4];
+  field_b[0] = 0.0;
+  field_b[1] = field_b[4] + field_b[0];
+  field_b[2] = 0.0;
+  field_b[3] = 0.0;
+  
+}
+
+
+template <typename scalar_t>
+__device__ __forceinline__ void
 boundary_conditions(const int boundaryType, scalar_t *field, scalar_t *field_b,
                     const scalar_t *normal, const scalar_t given_depth,
+                    const scalar_t given_wl,
                     const scalar_t given_qx, const scalar_t given_qy) {
   switch (boundaryType) {
   case 3: {
-    boundary_WallNonSlip(field, field_b);
+    boundary_WallNonSlip(field, field_b, normal);
     break;
   }
   case 4: {
@@ -381,11 +425,19 @@ boundary_conditions(const int boundaryType, scalar_t *field, scalar_t *field_b,
     break;
   }
   case 6: {
-    boundary_HQ_given(field, field_b, normal, given_depth, given_qx, given_qy);
+    boundary_H_given(field, field_b, given_depth);
     break;
   }
   case 7: {
-    boundary_Critical_Open(field, field_b, 0.15, 0.02);
+    boundary_Q_given(field, field_b, normal, given_qx, given_qy);
+    break;
+  }
+  case 8: {
+    boundary_wl_given(field, field_b, given_wl);
+    break;
+  }
+  case 9: {
+    boundary_fall(field, field_b);
     break;
   }
   }
@@ -394,11 +446,14 @@ boundary_conditions(const int boundaryType, scalar_t *field, scalar_t *field_b,
 template <typename scalar_t>
 __global__ void fluxCalculation_kernel(
     const int M, const int N, const int depth_w, const int depth_h,
+    const int wl_w, const int wl_h,
     const int discharge_w, const int discharge_h, int32_t *__restrict__ wetMask,
     scalar_t *__restrict__ h, scalar_t *__restrict__ wl,
     scalar_t *__restrict__ z, scalar_t *__restrict__ qx,
     scalar_t *__restrict__ qy, const int32_t *__restrict__ index,
-    const scalar_t *__restrict__ normal, scalar_t *__restrict__ given_depth,
+    const scalar_t *__restrict__ normal, 
+    scalar_t *__restrict__ given_depth,
+    scalar_t *__restrict__ given_wl,
     scalar_t *__restrict__ given_discharge, scalar_t *__restrict__ dx,
     scalar_t *__restrict__ t, scalar_t *__restrict__ dt,
     scalar_t *__restrict__ h_flux, scalar_t *__restrict__ qx_flux,
@@ -407,11 +462,16 @@ __global__ void fluxCalculation_kernel(
   scalar_t h_small = 1.0e-6;
   scalar_t g = 9.81;
   int timelevel_depth = 0;
+  int timelevel_wl = 0;
   int timelevel_discharge = 0;
 
   while ((t[0] > given_depth[timelevel_depth * depth_w]) &&
          (timelevel_depth < depth_h - 1)) {
     timelevel_depth++;
+  }
+  while ((t[0] > given_wl[timelevel_wl * wl_w]) &&
+         (timelevel_wl < wl_h - 1)) {
+    timelevel_wl++;
   }
   while ((t[0] > given_discharge[timelevel_discharge * discharge_w]) &&
          (timelevel_discharge < discharge_h - 1)) {
@@ -433,7 +493,7 @@ __global__ void fluxCalculation_kernel(
   int32_t c_type, c_id, r_id, l_id, rr_id;
   int32_t boundaryType, boundaryID;
   int n;
-  scalar_t h_boundary, qx_boundary, qy_boundary;
+  scalar_t h_boundary, wl_boundary, qx_boundary, qy_boundary;
 
   // get the index of cell
 
@@ -485,11 +545,12 @@ __global__ void fluxCalculation_kernel(
         // boundaryID = boundaryID - boundaryType * exp10f(n);
 
         h_boundary = given_depth[timelevel_depth * depth_w + boundaryID + 1];
+        wl_boundary = given_wl[timelevel_wl * wl_w + boundaryID + 1];
         qx_boundary = given_discharge[timelevel_discharge * discharge_w + 1 +
                                       2 * boundaryID];
         qy_boundary = given_discharge[timelevel_discharge * discharge_w + 2 +
                                       2 * boundaryID];
-        boundary_conditions(boundaryType, field_c, field_r, _normal, h_boundary,
+        boundary_conditions(boundaryType, field_c, field_r, _normal, h_boundary, wl_boundary,
                             qx_boundary, qy_boundary);
 
         field_r_h_z[0] = field_r[0];
@@ -585,7 +646,9 @@ void fluxCalculation_cuda(at::Tensor wetMask, at::Tensor h_flux,
                           at::Tensor qx_flux, at::Tensor qy_flux, at::Tensor h,
                           at::Tensor wl, at::Tensor z, at::Tensor qx,
                           at::Tensor qy, at::Tensor index, at::Tensor normal,
-                          at::Tensor given_depth, at::Tensor given_discharge,
+                          at::Tensor given_depth, 
+                          at::Tensor given_wl,
+                          at::Tensor given_discharge,
                           at::Tensor dx, at::Tensor t, at::Tensor dt) {
   at::cuda::CUDAGuard device_guard(h.device());
   cudaStream_t stream = at::cuda::getCurrentCUDAStream();
@@ -597,6 +660,8 @@ void fluxCalculation_cuda(at::Tensor wetMask, at::Tensor h_flux,
   const int N = h.size(0);
   const int depth_h = given_depth.size(0);
   const int depth_w = given_depth.size(1);
+  const int wl_h = given_wl.size(0);
+  const int wl_w = given_wl.size(1);
   const int discharge_h = given_discharge.size(0);
   const int discharge_w = given_discharge.size(1);
 
@@ -608,11 +673,11 @@ void fluxCalculation_cuda(at::Tensor wetMask, at::Tensor h_flux,
   AT_DISPATCH_FLOATING_TYPES(
       h.type(), "fluxCalculation_cuda", ([&] {
         fluxCalculation_kernel<scalar_t><<<block_0, thread_0, 0, stream>>>(
-            M, N, depth_w, depth_h, discharge_w, discharge_h,
+            M, N, depth_w, depth_h, wl_w, wl_h, discharge_w, discharge_h,
             wetMask.data<int32_t>(), h.data<scalar_t>(), wl.data<scalar_t>(),
             z.data<scalar_t>(), qx.data<scalar_t>(), qy.data<scalar_t>(),
             index.data<int32_t>(), normal.data<scalar_t>(),
-            given_depth.data<scalar_t>(), given_discharge.data<scalar_t>(),
+            given_depth.data<scalar_t>(), given_wl.data<scalar_t>(), given_discharge.data<scalar_t>(),
             dx.data<scalar_t>(), t.data<scalar_t>(), dt.data<scalar_t>(),
             h_flux.data<scalar_t>(), qx_flux.data<scalar_t>(),
             qy_flux.data<scalar_t>());
