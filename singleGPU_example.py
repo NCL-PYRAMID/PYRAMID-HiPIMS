@@ -43,28 +43,45 @@ def main():
     Degree = False
     gauges_position = np.array([])
     
-    boundBox = np.array([])
-    bc_type = np.array([])
+    # boundary condition: given Q 
+    # this part can be set as parameters on DAFNI
+    Qxrange = np.linspace(1.0, 5.0, num = 1000)
+    Qyrange = np.linspace(0.0, 0.0, num = 1000)
+    Trange = np.linspace(3600, 6*3600, num = 1000)
+    givenQ = np.array([Trange, Qxrange, Qyrange]).T
+    
+    given_Q1 = np.array([[0.0,1.0,0.0]]) 
+    given_Q2 = np.array([[12*3600,5.0,0.0]]) 
+    given_Q = np.vstack((given_Q1, givenQ, given_Q2))
+     
+    boundList = {
+        'Q_GIVEN': given_Q
+    }
+    
+    boundBox = np.array([[421612.74,563226.97,421620.6,563340.9]])
+    bc_type = ['Q_GIVEN']
+    default_BC = 'OPEN'
+    # end of boundary condition
+    
     rasterPath = {
         'DEM_path': os.path.join(RASTER_PATH, 'DEM.tif'),
         'Landuse_path': os.path.join(RASTER_PATH, 'Landuse.tif'),
         'Rainfall_path': os.path.join(RASTER_PATH, 'RainMask.tif')
     }
     landLevel = 0
-    default_BC = 60
-
+    
     paraDict = {
        'deviceID': 0,
         'dx': 2.,
         'CFL': 0.5,
         'Manning': Manning,
-        'Export_timeStep': 3. * 3600.,        
+        'Export_timeStep': 1. * 3600.,        
         't': 0.0,
         'export_n': 0,
         'secondOrder': False,
         'firstTimeStep': 1.0,
         'tensorType': torch.float64,
-        'EndTime': 24. * 3600.,        
+        'EndTime': 12. * 3600.,        
         'Degree': Degree,
         'OUTPUT_PATH': OUTPUT_PATH,
         'rasterPath': rasterPath,
@@ -76,7 +93,10 @@ def main():
         'hydraulic_conductivity': hydraulic_conductivity,
         'capillary_head': capillary_head,
         'water_content_diff': water_content_diff, 
-        'default_BC':default_BC
+        'default_BC':default_BC,
+        'boundBox': boundBox,
+        'bc_type': bc_type,
+        'boundList':boundList
     }
 
     catchFlood.run(paraDict)

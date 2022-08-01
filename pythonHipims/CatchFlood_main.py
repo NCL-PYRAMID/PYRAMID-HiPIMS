@@ -47,7 +47,8 @@ def run(paraDict):
         paraDict['rasterPath']['DEM_path'],
         device,
         gauges_position=paraDict['gauges_position'],
-        boundBox=paraDict['boundBox'],default_BC=paraDict['default_BC'],
+        boundBox=paraDict['boundBox'],
+        default_BC=paraDict['default_BC'],
         bc_type=paraDict['bc_type'])
     if paraDict['Degree']:
         paraDict['dx'] = pre.degreeToMeter(demMeta['transform'][0])
@@ -66,6 +67,8 @@ def run(paraDict):
     qy = torch.zeros_like(z, device=device)
     wl = h + z
 
+    # xx = mask[mask>10]
+    # print(xx[xx<90])
     # ===============================================
     # rainfall data
     # ===============================================
@@ -99,6 +102,8 @@ def run(paraDict):
     numerical.set_distributed_rainfall_station_Mask(mask,
                                                     rainfall_station_Mask,
                                                     device)
+    if 'boundList' in paraDict:
+        numerical.set_boundary_tensor(paraDict['boundList'],device)
     # ======================================================================
     # uniform rainfall test
     # ======================================================================
@@ -106,8 +111,9 @@ def run(paraDict):
     #                            [3610.0, 0.0], [7200.0, 0.0]])
     # numerical.set_uniform_rainfall_time_index()
     # ======================================================================
-
+    
     del mask, landuse, h, qx, qy, wl, z, rainfall_station_Mask
+    
     torch.cuda.empty_cache()
     numerical.exportField()
     simulation_start = time.time()
@@ -129,6 +135,7 @@ def run(paraDict):
             t_list.append(numerical.t.item())
             print("{:.3f}".format(numerical.t.item()))
             n+=1
+            
     else:
         while numerical.t.item() < paraDict['EndTime']:
             numerical.addFlux()

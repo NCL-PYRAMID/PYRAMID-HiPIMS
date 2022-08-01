@@ -181,7 +181,7 @@ def setBoundaryEdge(mask,
                     mask_boundary,
                     demMeta,
                     device,
-                    boundBox=np.array([]),default_BC=30,
+                    boundBox=np.array([]),default_BC=90,
                     bc_type=6):
     # boundBox = [[x_min, y_min, x_max, y_max],[x_min, y_min, x_max, y_max]]
     # it will be great if you can get the box from gis tools
@@ -221,8 +221,10 @@ def setBoundaryEdge(mask,
 def importDEMData_And_BC(DEM_path,
                          device,
                          gauges_position=np.array([]),
-                         boundBox=np.array([]), default_BC=60,
-                         bc_type=6):
+                         boundBox=np.array([]), 
+                         default_BC=90,
+                         bc_type=5
+                        ):
     with rio.open(DEM_path) as src:
         demMasked = src.read(1, masked=True)
         demMeta = src.meta
@@ -233,7 +235,7 @@ def importDEMData_And_BC(DEM_path,
     # mask = torch.from_numpy(mask).to(device=device)
     mask = torch.from_numpy(mask)
     maskID = mask.to(torch.int32)
-
+    
     oppo_direction = np.array([[-1, 1], [1, 0], [1, 1], [-1, 0]])
 
     mask_boundary = torch.zeros_like(mask, dtype=torch.int32)
@@ -277,14 +279,29 @@ def importDEMData_And_BC(DEM_path,
 
         gauge_index_1D = gauge_index_1D[ranks]
 
-    bc_dict = {'WALL_NON_SLIP': 3, 'WALL_SLIP': 4, 'OPEN': 5, 'HQ_GIVEN': 6, 'CRITICAL_OPEN':7, "Q_GIVEN":8}
+    bc_dict = {'RIGID': 3, 
+               'WALL_SLIP': 4, 
+               'OPEN': 5, 
+               'H_GIVEN': 6, 
+               "Q_GIVEN":7,
+               'WL_GIVEN': 8,
+               'FALL': 9}
     # set the default BC as HQ_GIVEN, and H and Q are 0.0
 
-    mask[mask_boundary] = default_BC
+    if type(default_BC) == str:
+        try:
+            default_BC = bc_dict[default_BC]
+        except KeyError:
+                print(
+                    "The keys should be: RIGID, WALL_SLIP, OPEN, H_GIVEN, Q_GIVEN, WL_GIVEN"
+                )
+    else:
+        default_BC = default_BC
+    mask[mask_boundary] = default_BC * 10
     
 
     # as the index will start with 0
-    bc_count = [-1, -1, -1, -1, -1, -1]
+    bc_count = [-1, -1, -1, -1, -1, -1,-1]
     
     bc_count[list(bc_dict.values()).index(int(str(default_BC)[0]))] += 1
 
@@ -297,7 +314,7 @@ def importDEMData_And_BC(DEM_path,
                     BC_TYPE = bc_dict[bc_type[i]]
                 except KeyError:
                     print(
-                        "The keys should be: WALL_NON_SLIP, WALL_SLIP, OPEN, HQ_GIVEN"
+                        "The keys should be: RIGID, WALL_SLIP, OPEN, H_GIVEN, Q_GIVEN, WL_GIVEN"
                     )
             else:
                 BC_TYPE = bc_type[i]
@@ -334,7 +351,7 @@ def importDEMData_And_BC(DEM_path,
     # dem[mask_GPU == 60] += 2.0
     # dem[mask_GPU == 61] += 2.0
 
-    print(mask[mask == 61])
+    # print(mask[mask == 80])
     del mask
     torch.cuda.empty_cache()
     return dem, mask_GPU, demMeta, gauge_index_1D

@@ -102,6 +102,9 @@ class Godunov:
         self._given_depth = torch.tensor([[0.0, 0.0]],
                                          dtype=self._tensorType,
                                          device=device)
+        self._given_wl = torch.tensor([[0.0, 0.0]],
+                                         dtype=self._tensorType,
+                                         device=device)
         self._given_discharge = torch.tensor([[0.0, 0.0, 0.0]],
                                              dtype=self._tensorType,
                                              device=device)
@@ -234,10 +237,39 @@ class Godunov:
         self._cumulativeWaterDepth = torch.zeros_like(self._h_internal,
                                                       device=device)
 
-    def set_boundary_tensor(self, given_depth, given_discharge):
-        self._given_depth = given_depth
-        self._given_discharge = given_discharge
-        del given_depth, given_discharge
+    def set_boundary_tensor(self, boundList, device):
+        if 'H_GIVEN' in boundList:
+            if type(boundList['H_GIVEN']) == str:
+                given_depth = np.loadtxt(boundList['H_GIVEN'])
+                self._given_depth = torch.tensor(given_depth,
+                                                 dtype=self._tensorType,
+                                                device=device)
+            else:
+                self._given_depth = torch.tensor(boundList['H_GIVEN'],
+                                                dtype=self._tensorType,
+                                                device=device)
+        if 'WL_GIVEN' in boundList:
+            if type(boundList['WL_GIVEN']) == str:
+                given_wl = np.loadtxt(boundList['WL_GIVEN'])
+                self._given_wl = torch.tensor(given_wl,
+                                                 dtype=self._tensorType,
+                                                device=device)
+            else:
+                self._given_wl = torch.tensor(boundList['WL_GIVEN'],
+                                                dtype=self._tensorType,
+                                                device=device)
+        if 'Q_GIVEN' in boundList:
+            if type(boundList['Q_GIVEN']) == str:
+                given_discharge = np.loadtxt(boundList['Q_GIVEN'])
+                self._given_discharge = torch.tensor(given_discharge,
+                                                 dtype=self._tensorType,
+                                                device=device)
+            else:
+                self._given_discharge = torch.tensor(boundList['Q_GIVEN'],
+                                                dtype=self._tensorType,
+                                                device=device)
+            
+        del boundList
         torch.cuda.empty_cache()
 
     def set_landuse(self, mask, landuseMask, device):
@@ -305,6 +337,7 @@ class Godunov:
                                                     device=device)
 
     def addFlux(self):
+        # pass
         if self._consider_sedimentMovement:
             self._wetMask = torch.zeros_like(self._h_internal,
                                              dtype=torch.bool)
@@ -334,7 +367,7 @@ class Godunov:
             )
             torch.cuda.empty_cache()
         else:
-            if self._secondOrder:
+            if self._secondOrder:                
                 self._wetMask = torch.zeros_like(self._h_internal,
                                                 dtype=torch.bool)
                 fluxMask.update(self._wetMask, self._h_internal, self._index,
@@ -354,21 +387,21 @@ class Godunov:
                     self._index,
                     self._normal,
                     self._given_depth,
+                    self._given_wl,
                     self._given_discharge,
                     self.dx,
                     self.t,
                     self.dt,
                 )
                 torch.cuda.empty_cache()
-            else:
+            else:                
                 self._wetMask = torch.zeros_like(self._h_internal,
                                                 dtype=torch.bool)
                 fluxMask.update(self._wetMask, self._h_internal, self._index,
                                 self.t)
                 self._wetMask = torch.flatten(self._wetMask.nonzero().type(
                     torch.int32))
-                fluxCalculation_jh_modified_surface.addFlux(
-                # fluxCalculation_1stOrder_Hou.addFlux(
+                fluxCalculation_jh_modified_surface.addFlux(                
                     self._wetMask,
                     self._h_update,
                     self._qx_update,
@@ -381,12 +414,14 @@ class Godunov:
                     self._index,
                     self._normal,
                     self._given_depth,
+                    self._given_wl,
                     self._given_discharge,
                     self.dx,
                     self.t,
                     self.dt,
                 )
-                torch.cuda.empty_cache()
+                
+        torch.cuda.empty_cache()
 
     def addFriction(self):
         frictionCalculation.addFriction(
