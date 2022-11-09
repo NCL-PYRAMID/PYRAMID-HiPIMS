@@ -10,6 +10,7 @@
 import os, sys
 import torch
 import numpy as np
+import datetime
 from pythonHipims import CatchFlood_main as catchFlood
 
 ###############################################################################
@@ -103,3 +104,46 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Fix for missing DAFNI metadata file
+# TODO: add this properly!
+title = os.getenv('TITLE', 'PYRAMID <dataset> HiPIMS Simulation Output')
+description = 'Output from HiPIMS simulator'
+geojson = {}
+metadata = f"""{{
+  "@context": ["metadata-v1"],
+  "@type": "dcat:Dataset",
+  "dct:language": "en",
+  "dct:title": "{title}",
+  "dct:description": "{description}",
+  "dcat:keyword": [
+    "shetran"
+  ],
+  "dct:subject": "Environment",
+  "dct:license": {{
+    "@type": "LicenseDocument",
+    "@id": "https://creativecommons.org/licences/by/4.0/",
+    "rdfs:label": null
+  }},
+  "dct:creator": [{{"@type": "foaf:Organization"}}],
+  "dcat:contactPoint": {{
+    "@type": "vcard:Organization",
+    "vcard:fn": "DAFNI",
+    "vcard:hasEmail": "support@dafni.ac.uk"
+  }},
+  "dct:created": "{datetime.datetime.now().isoformat()}Z",
+  "dct:PeriodOfTime": {{
+    "type": "dct:PeriodOfTime",
+    "time:hasBeginning": null,
+    "time:hasEnd": null
+  }},
+  "dafni_version_note": "created",
+  "dct:spatial": {{
+    "@type": "dct:Location",
+    "rdfs:label": null
+  }},
+  "geojson": {geojson}
+}}
+"""
+with open(os.path.join(OUTPUT_PATH, 'metadata.json'), 'w') as f:
+    f.write(metadata)
