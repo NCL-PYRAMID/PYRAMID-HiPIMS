@@ -1,9 +1,9 @@
 name: Upload to DAFNI
 
 on:
-  release:
-    types: [published]
-
+  push:
+    tags:
+      - 'v*.*.*'
   workflow_dispatch:
   
 jobs:
@@ -24,7 +24,12 @@ jobs:
         run: docker save pyramid-hipims | gzip > pyramid-hipims.tar.gz
 
       - name: Set tag as env
-        run: echo "TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+        
+      - name: Verify release version tag
+        run: |
+          echo $RELEASE_VERSION
+          echo ${{ env.RELEASE_VERSION }}
 
       - name: Upload to DAFNI
         uses: dafnifacility/dafni-model-uploader@v1.9
@@ -33,5 +38,5 @@ jobs:
           image-path: ./pyramid-hipims.tar.gz
           username: ${{ secrets.DAFNI_SERVICE_ACCOUNT_USERNAME }}
           password: ${{ secrets.DAFNI_SERVICE_ACCOUNT_PASSWORD }}
-          version-message: ${{ env.TAG }}
+          version-message: ${{ env.RELEASE_VERSION }}
           parent-model: "914e0525-475d-4161-bea0-17f49f308563"
