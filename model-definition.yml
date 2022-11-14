@@ -1,7 +1,7 @@
 kind: model
 api_version: v1beta1
 metadata:
-  display_name: HiPIMS for PYRAMID
+  display_name: PYRAMID <model> HiPIMS for PYRAMID
   name: pyramid-hipims
   summary: Extended HiPIMS for PYRAMID that includes floating debris modelling
   type: model
