@@ -1,5 +1,5 @@
 kind: model
-api_version: v1beta1
+api_version: v1beta2
 metadata:
   display_name: PYRAMID <model> HiPIMS for PYRAMID
   name: pyramid-hipims
@@ -32,4 +32,5 @@ spec:
   outputs:
     datasets:
       - name: PYRAMID HiPIMS Test Data Set - Simulation Results
+        type: txt
         description: Set of files describing the flooding at time steps through the analysis
