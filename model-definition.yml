@@ -1,4 +1,4 @@
-kind: model
+kind: M
 api_version: v1beta2
 metadata:
   display_name: PYRAMID <model> HiPIMS for PYRAMID
