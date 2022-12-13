@@ -1,0 +1,18 @@
+# Previously-saved Docker images
+*.tar
+*.gz
+
+# Data folder
+data/
+
+# Build-related files
+tf/
+free_disk_space.sh
+Dockerfile
+vmsetup.sh
+
+# DAFNI-related files
+model-definition.yml
+
+# Repository files
+README.md

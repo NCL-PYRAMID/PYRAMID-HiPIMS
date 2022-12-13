@@ -46,6 +46,10 @@ SHELL ["conda", "run", "-n", "hipims", "--no-capture-output", "/bin/bash", "-c"]
 #RUN conda install cudatoolkit
 
 # Copy files to container
+# DO NOT copy the whole directory - this runs the risk of copying existing
+# saved Docker images and test data files. Also, the Terraform and Docker
+# build files are unneccessary
+WORKDIR /hipims
 COPY ./ .
 
 # Compile hipims model
