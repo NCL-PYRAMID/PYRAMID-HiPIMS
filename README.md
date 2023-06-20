@@ -373,7 +373,16 @@ cd PYRAMID-HiPIMS
 sudo docker build . -t pyramid-hipims
 ```
 
-To run the application on the VM, we need to transfer the test data from DAFNI to the VM (TO DO). Then we can run the application using
+To run the application on the VM, we need to transfer the test data from DAFNI to the VM. DAFNI hosts an example dataset "PYRAMID HiPIMS Test Data Set" which is used for testing HiPIMS. As of 20/06/2023 the dataset is versioned as follows:
+
+| Dataset Source | ID |
+| --- | --- |
+| Current Version | f3b44124-d24b-43d0-9703-bbd79fb8825c |
+| Parent Version | 1fa68701-0a4a-4aa7-8e8e-e3f7707c93d6 |
+
+This dataset should be transferred to the VM (e.g. using [fileZilla](https://filezilla-project.org/)) following the instructions in `data/inputs/README.md`.
+
+Then we can run the application using
 ```
 sudo docker run -it --gpus all -v "$(pwd)/data:/data" pyramid-hipims
 ```
@@ -392,7 +401,19 @@ docker run -v "$(pwd)/data:/data" pyramid-hipims
 Data produced by the application will be in data/outputs. Note that because of the way that Docker permissions work, these data will have `root/root` ownership permissions. You will need to use elevated `sudo` privileges to delete the outputs folder.
 
 ### Production
-#### DAFNI upload
+#### CI/CD with GitHub Actions
+The HiPIMS model can be deployed to DAFNi using GitHub Actions. The relevant workflows are built into the HiPIMS model repository and use the [DAFNI Model Uploader Action](https://github.com/dafnifacility/dafni-model-uploader) to update the DAFNI model. The workflows trigger on the creation of a new release tag which follows [semantic versioning](https://semver.org/) and takes the format `vx.y.z` where `x` is a major release, `y` a minor release, and `z` a patch release.
+
+The DAFNI model upload process is prone to failing, often during model ingestion, in which case a deployment action will show a failed status. Such deployment failures might be a result of a DAFNI timeout, or there might be a problem with the model build. It is possible to re-run the action in GitHub if it is evident that the failure is as a result of a DAFNI timeout. However, deployment failures caused by programming errors (e.g. an error in the model definition file) that are fixed as part of the deployment process will **not** be included in the tagged release! It is thus best practice in case of a deployment failure always to delete the version tag and to go through the release process again, re-creating the version tag and re-triggering the workflows.
+
+The DAFNI model upload process requires valid user credentials. These are stored in the NCL-PYRAMID organization "Actions secrets and variables", and are:
+```
+DAFNI_SERVICE_ACCOUNT_USERNAME
+DAFNI_SERVICE_ACCOUNT_PASSWORD
+```
+Any NCL-PYRAMID member with a valid DAFNI login may update these credentials.
+
+#### Direct DAFNI upload
 The model is containerised using Docker, and the image is _tar_'ed and _zip_'ed for uploading to DAFNI. Use the following commands in a *nix shell to accomplish this.
 
 ```
