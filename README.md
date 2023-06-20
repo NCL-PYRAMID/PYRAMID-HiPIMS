@@ -3,7 +3,7 @@ CUDA-enabled HiPIMS for DAFNI
 
 ## About
 
-HiPIMS standards for High-Performance Integrated hydrodynamic Modelling System. It uses state-of-art numerical schemes (Godunov-type finite volume) to solve the 2D shallow water equations for flood simulations. To support high-resolution flood simulations, HiPIMS is implemented on multiple GPUs (Graphics Processing Unit) using CUDA/C++ languages to achieve high-performance computing. 
+HiPIMS stands for High-Performance Integrated hydrodynamic Modelling System. It uses state-of-art numerical schemes (Godunov-type finite volume) to solve the 2D shallow water equations for flood simulations. To support high-resolution flood simulations, HiPIMS is implemented on multiple GPUs (Graphics Processing Unit) using CUDA/C++ languages to achieve high-performance computing. 
 
 ### Project Team
 Xue Tong, Loughborough University ([x.tong2@lboro.ac.uk](mailto:x.tong2@lboro.ac.uk))  
@@ -11,7 +11,7 @@ Elizabeth Lewis, Newcastle University  ([elizabeth.lewis2@newcastle.ac.uk](mailt
 
 ### RSE Contact
 Robin Wardle  
-RSE Team, Newcastle Data  
+RSE Team, NICD  
 Newcastle University NE1 7RU  
 ([robin.wardle@newcastle.ac.uk](mailto:robin.wardle@newcastle.ac.uk))  
 
@@ -19,8 +19,7 @@ Newcastle University NE1 7RU
 ## Getting Started
 
 ### Prerequisites
-HiPIMs is a CUDA-enabled application and requires NVidia GPU hardware 
-and drivers to run, although it can be compiled with the NVidia CUDA Toolkit without the presence of NVidia hardware. The CUDA Toolkit contains the necessary libraries, header files and configuration information for the compilation of CUDA-enabled applications. The HiPMS deployment requires the following software to be installed on the build machine. These instructions assume a Debian-based Linux distribution and were developed under Ubuntu 20.04.
+HiPIMS is a CUDA-enabled application and requires NVidia GPU hardware and drivers to run, although it can be compiled with the NVidia CUDA Toolkit without the presence of NVidia hardware. The CUDA Toolkit contains the necessary libraries, header files and configuration information for the compilation of CUDA-enabled applications. The HiPMS deployment requires the following software to be installed on the build machine. These instructions assume a Debian-based Linux distribution and were developed under Ubuntu 20.04.
 
 - a Linux operating system for build and installation with `root` access through `sudo`
 - `apt` package management tool (or equivalent)
