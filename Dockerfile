@@ -12,7 +12,12 @@ FROM nvidia/cuda:10.2-devel-ubuntu18.04
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 ENV PATH /opt/conda/bin:$PATH
 
+# App working directory
+WORKDIR /hipims
+
 # Update apt and install appropriate packages
+RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/3bf863cc.pub
+RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/7fa2af80.pub
 RUN apt update --fix-missing
 RUN apt install -y wget
 RUN apt upgrade -y
@@ -32,7 +37,6 @@ channels:\n\
 # Create himpims environment and set CUDA root
 # Requires Python 3.7 - all requirements are in hipims-environment.yml
 # Does NOT work with Python 3.8+, specifically with rasterio module
-WORKDIR /hipims
 COPY hipims-environment.yml .
 RUN conda env create -f hipims-environment.yml
 #ENV CUDA_ROOT /usr/local/cuda/bin

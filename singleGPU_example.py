@@ -34,7 +34,13 @@ def main():
     # Input and Output data paths
     RASTER_PATH = os.path.join(CASE_PATH, 'inputs')
     OUTPUT_PATH = os.path.join(CASE_PATH, 'outputs')
-    Rainfall_data_Path = os.path.join(RASTER_PATH, 'rain_source_2523.txt')
+
+    external_rainfall_filename = os.path.join(RASTER_PATH, "HIPIMS", "rain_source.txt")
+    if os.path.exists(external_rainfall_filename):
+        Rainfall_data_Path = external_rainfall_filename
+    else:
+        Rainfall_data_Path = os.path.join(RASTER_PATH, 'rain_source_2523.txt')
+    print("Using rainfall data: {}".format(Rainfall_data_Path))
     
     Manning = np.array([0.02,0.03,0.03,0.03,0.02,0.03,0.03,0.03,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.03])
     hydraulic_conductivity = 0.0
