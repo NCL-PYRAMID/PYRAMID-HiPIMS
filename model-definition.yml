@@ -26,7 +26,7 @@ spec:
       - name: PYRAMID HiPIMS Test Data Set
         description: DEM, rainfall and other data for testing
         default:
-          - f3b44124-d24b-43d0-9703-bbd79fb8825c
+          - eb80f93a-a8aa-46e2-8c5e-070e2330753f
         path: inputs
         required: true
   outputs:
