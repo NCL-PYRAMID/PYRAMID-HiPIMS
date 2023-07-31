@@ -71,7 +71,7 @@ def main():
     # end of boundary condition
     
     rasterPath = {
-        'DEM_path': os.path.join(RASTER_PATH, 'DEM.tif'),
+        'DEM_path': os.path.join(RASTER_PATH, 'Dem.tif'),
         'Landuse_path': os.path.join(RASTER_PATH, 'Landuse.tif'),
         'Rainfall_path': os.path.join(RASTER_PATH, 'RainMask.tif')
     }
